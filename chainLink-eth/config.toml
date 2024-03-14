@@ -1,0 +1,18 @@
+[Log]
+Level = 'warn'
+
+[WebServer]
+AllowOrigins = '\*'
+SecureCookies = false
+
+[WebServer.TLS]
+HTTPSPort = 0
+
+[[EVM]]
+ChainID = '2024'
+
+[[EVM.Nodes]]
+Name = 'node00'
+WSURL = 'wss://192.168.1.18:8546'
+HTTPURL = 'http://192.168.1.18:8000'
+

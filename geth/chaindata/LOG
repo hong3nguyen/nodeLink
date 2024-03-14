@@ -1,8 +1,44 @@
 =============== Mar 14, 2024 (EET) ===============
-13:34:59.564079 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-13:34:59.587825 db@open opening
-13:34:59.595488 version@stat F·[] S·0B[] Sc·[]
-13:34:59.599660 db@janitor F·2 G·0
-13:34:59.599905 db@open done T·11.826377ms
-13:34:59.607288 db@close closing
-13:34:59.608283 db@close done T·965.744µs
+16:02:44.022842 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+16:02:44.046647 db@open opening
+16:02:44.051528 version@stat F·[] S·0B[] Sc·[]
+16:02:44.055348 db@janitor F·2 G·0
+16:02:44.055583 db@open done T·8.691488ms
+16:02:44.066441 db@close closing
+16:02:44.068022 db@close done T·1.557993ms
+=============== Mar 14, 2024 (EET) ===============
+16:03:00.956222 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+16:03:00.963040 version@stat F·[] S·0B[] Sc·[]
+16:03:00.963407 db@open opening
+16:03:00.964978 journal@recovery F·1
+16:03:00.969488 journal@recovery recovering @1
+16:03:00.981218 memdb@flush created L0@2 N·10 S·599B "H\xacj..\x15\n\b,v3":"r\x00\x00..\x15\n\b,v5"
+16:03:00.990664 version@stat F·[1] S·599B[599B] Sc·[0.25]
+16:03:01.009884 db@janitor F·3 G·0
+16:03:01.010525 db@open done T·46.992068ms
+16:03:03.265010 db@close closing
+16:03:03.266057 db@close done T·1.01865ms
+=============== Mar 14, 2024 (EET) ===============
+16:42:35.429121 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+16:42:35.440176 version@stat F·[1] S·599B[599B] Sc·[0.25]
+16:42:35.440834 db@open opening
+16:42:35.443045 journal@recovery F·1
+16:42:35.446286 journal@recovery recovering @3
+16:42:35.453371 memdb@flush created L0@5 N·7 S·341B "Dat..ion,v12":"unc..own,v18"
+16:42:35.462879 version@stat F·[2] S·940B[940B] Sc·[0.50]
+16:42:35.494961 db@janitor F·4 G·0
+16:42:35.495435 db@open done T·54.494489ms
+16:43:33.991725 db@close closing
+16:43:33.992918 db@close done T·1.19128ms
+=============== Mar 14, 2024 (EET) ===============
+16:45:43.406536 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+16:45:43.413548 version@stat F·[2] S·940B[940B] Sc·[0.50]
+16:45:43.413881 db@open opening
+16:45:43.415339 journal@recovery F·1
+16:45:43.418956 journal@recovery recovering @6
+16:45:43.428200 memdb@flush created L0@8 N·4 S·301B "Sna..tor,v21":"unc..own,v20"
+16:45:43.440234 version@stat F·[3] S·1KiB[1KiB] Sc·[0.75]
+16:45:43.466359 db@janitor F·5 G·0
+16:45:43.466774 db@open done T·52.81732ms
+17:11:15.655492 db@close closing
+17:11:15.657389 db@close done T·1.896869ms
