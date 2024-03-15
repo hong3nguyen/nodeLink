@@ -6,17 +6,18 @@
 # Ethereum - PoW version
 
 ## reset geth old data
-> geth removedb; rm -rf geth
+> ./geth_run/geth removedb; rm -rf geth
 
 ## initial folder
-> geth --datadir . init genesis.json
+> ./geth_run/geth --datadir . init genesis.json
 
 ## execute Ethereum or Ethereum client from Link view
-
-> ./geth_run/geth --identity "node00" --http --http.addr "192.168.1.18" --http.port "8000" --http.corsdomain "*" --datadir . --port "30303" --nodiscover --http.api "eth,debug,net,web3,personal,miner,admin" --ws --ws.addr "192.168.1.18" --ws.port 8546 --networkid 2024 --nat "any" --ipcdisable --allow-insecure-unlock --rpc.gascap "999999" --miner.gaslimit "30067718" --override.terminaltotaldifficulty "750000"
+> IP=$(ip -4 addr show enp0s3 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+> 
+> ./geth_run/geth --identity "node00" --http --http.addr $IP --http.port "8000" --http.corsdomain "*" --datadir . --port "30303" --nodiscover --http.api "eth,debug,net,web3,personal,miner,admin" --ws --ws.addr $IP --ws.port 8546 --networkid 2024 --nat "any" --ipcdisable --allow-insecure-unlock --rpc.gascap "999999" --miner.gaslimit "30067718" --override.terminaltotaldifficulty "750000"
 
 ## console to each node
-> geth attach http://192.168.1.18:8000
+> geth attach http://$IP:8000
 
 ### Create a new account
 > personal.newAccount()
@@ -63,6 +64,9 @@ Create a folder for chainlink data
 
 Create a config.toml for configuration
 ``` 
+
+IP=$(ip -4 addr show enp0s3 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+
 echo "[Log]
 Level = 'warn'
 
@@ -72,14 +76,18 @@ SecureCookies = false
 
 [WebServer.TLS]
 HTTPSPort = 0
+SecureCookies = false
+
+[Insecure]
+DevWebServer = true
 
 [[EVM]]
 ChainID = '2024'
 
 [[EVM.Nodes]]
 Name = 'node00'
-WSURL = 'wss://192.168.1.18:8546'
-HTTPURL = 'http://192.168.1.18:8000'
+WSURL = 'ws://$IP:8546'
+HTTPURL = 'http://$IP:8000'
 " > chainLink-eth/config.toml
 ```
 
@@ -97,3 +105,25 @@ URL = 'postgresql://postgres:Trideptrai123456789@host.docker.internal:5432/postg
 > 
 > docker run --platform linux/x86_64/v8 --name chainlink -v .:/chainlink -it -p 6688:6688 --add-host=host.docker.internal:host-gateway smartcontract/chainlink:2.0.0 node -config /chainlink/config.toml -secrets /chainlink/secrets.toml start
 
+## add job
+```
+type            = "cron"
+schemaVersion   = 1
+schedule        = "CRON_TZ=UTC 0 0 1 1 *"
+# Optional externalJobID: Automatically generated if unspecified
+# externalJobID   = "0EEC7E1D-D0D2-476C-A1A8-72DFB6633F46"
+observationSource   = """
+ds          [type="http" method=GET url="https://chain.link/ETH-USD"];
+ds_parse    [type="jsonparse" path="data,price"];
+ds_multiply [type="multiply" times=100];
+ds -> ds_parse -> ds_multiply;
+
+OR
+
+curl -X POST -H 'Content-Type: application/json' -d @job.json http://localhost:6688/v2/specs
+"""
+```
+
+## run job 
+
+> curl -X POST http://localhost:6688/v2/specs/:id from the job/runs
