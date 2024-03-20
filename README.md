@@ -14,10 +14,10 @@
 ## execute Ethereum or Ethereum client from Link view
 > IP=$(ip -4 addr show enp0s3 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
 > 
-> ./geth_run/geth --identity "node00" --http --http.addr $IP --http.port "8000" --http.corsdomain "*" --datadir . --port "30303" --nodiscover --http.api "eth,debug,net,web3,personal,miner,admin" --ws --ws.addr $IP --ws.port 8546 --networkid 2024 --nat "any" --ipcdisable --allow-insecure-unlock --rpc.gascap "999999" --miner.gaslimit "30067718" --override.terminaltotaldifficulty "750000"
+> ./geth_run/geth --identity "node00" --http --http.addr $IP --http.port "8000" --http.corsdomain "*" --datadir . --port "30303" --nodiscover --http.api "eth,debug,net,web3,personal,miner,admin" --ws --ws.addr $IP --ws.port 8546 --networkid 2024 --nat "any" --allow-insecure-unlock --rpc.gascap "999999" --ipcpath=~/Pictures/
 
 ## console to each node
-> geth attach http://$IP:8000
+> ./geth_run/geth attach http://$IP:8000
 
 ### Create a new account
 > personal.newAccount()
@@ -44,6 +44,47 @@ Either way, try
 
 > miner.stop()
 
+
+### Truffle for smart contract 
+#### [install nodejs](https://ostechnix.com/install-node-js-linux/) vs truffle
+```
+nvm install 12.20.2
+ 
+nvm use 12.20.2
+
+npm install -g truffle
+
+mkdir truffle
+
+cd truffle 
+
+truffle init
+
+```
+
+/truffle/contract/hello.sol
+```
+pragma solidity >=0.4.22 <0.9.0;
+contract Hello {
+  string public message;
+  constructor() {
+    message = "Hello, World : This is a Solidity Smart Contract on the Private Ethereum Blockchain ";
+    }
+}
+```
+/truffle/migration/1_initial_migration.js
+```
+var Migrations = artifacts.require("Migrations");
+var Hello = artifacts.require("test");
+
+module.exports = function(deployer) {
+  deployer.deploy(Migrations);
+  deployer.deploy(Hello);
+};
+```
+> npm install --no-bin-links
+
+Current problem with solidity version 0.8.20 so we need to move the compile to be 0.8.19
 # LINK
 
 ## env - [install docker](docs.docker.com/engine/install/ubuntu/)
@@ -67,19 +108,22 @@ Create a config.toml for configuration
 
 IP=$(ip -4 addr show enp0s3 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
 
-echo "[Log]
+echo "InsecureFastScrypt = true # Default
+RootDir = '~/.chainlink' # Default
+ShutdownGracePeriod = '5s' # Default
+
+[Log]
 Level = 'warn'
 
 [WebServer]
 AllowOrigins = '\*'
-SecureCookies = false
-
-[WebServer.TLS]
-HTTPSPort = 0
-SecureCookies = false
+TLS.HTTPSPort = 0
 
 [Insecure]
 DevWebServer = true
+
+[WebServer.TLS]
+HTTPSPort = 0
 
 [[EVM]]
 ChainID = '2024'
@@ -109,7 +153,7 @@ URL = 'postgresql://postgres:Trideptrai123456789@host.docker.internal:5432/postg
 ```
 type            = "cron"
 schemaVersion   = 1
-schedule        = "CRON_TZ=UTC 0 0 1 1 *"
+schedule = "CRON_TZ=UTC 0 0 1 1 * *"
 # Optional externalJobID: Automatically generated if unspecified
 # externalJobID   = "0EEC7E1D-D0D2-476C-A1A8-72DFB6633F46"
 observationSource   = """
@@ -117,13 +161,29 @@ ds          [type="http" method=GET url="https://chain.link/ETH-USD"];
 ds_parse    [type="jsonparse" path="data,price"];
 ds_multiply [type="multiply" times=100];
 ds -> ds_parse -> ds_multiply;
+"""
 
 OR
 
-curl -X POST -H 'Content-Type: application/json' -d @job.json http://localhost:6688/v2/specs
+type = "directrequest"
+schemaVersion = 1
+
+# Optional externalJobID: Automatically generated if unspecified
+# externalJobID   = "0EEC7E1D-D0D2-476C-A1A8-72DFB6633F46"
+
+observationSource   = """
+ds          [type="http" method=GET url="https://chain.link/ETH-USD"];
+ds_parse    [type="jsonparse" path="data,price"];
+ds_multiply [type="multiply" times=100];
+ds -> ds_parse -> ds_multiply;
 """
+
+curl -X POST -H 'Content-Type: application/json' -d @job.toml http://localhost:6688/v2/specs
 ```
 
 ## run job 
 
-> curl -X POST http://localhost:6688/v2/specs/:id from the job/runs
+> curl -X POST http://localhost:6688/v2/specs/:id
+
+## Smart contract chainlink
+> docker pull smartcontract/chainlink:1.11.0

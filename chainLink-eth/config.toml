@@ -17,6 +17,6 @@ ChainID = '2024'
 
 [[EVM.Nodes]]
 Name = 'node00'
-WSURL = 'ws://192.168.3.83:8546'
-HTTPURL = 'http://192.168.3.83:8000'
+WSURL = 'ws://192.168.3.66:8546'
+HTTPURL = 'http://192.168.3.66:8000'
 
