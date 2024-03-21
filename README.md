@@ -47,7 +47,7 @@ Either way, try
 
 ### Truffle for smart contract 
 #### [install nodejs](https://ostechnix.com/install-node-js-linux/) vs truffle
-```
+``` bash
 nvm install 12.20.2
  
 nvm use 12.20.2
@@ -63,7 +63,7 @@ truffle init
 ```
 
 /truffle/contract/hello.sol
-```
+``` solidity
 pragma solidity >=0.4.22 <0.9.0;
 contract Hello {
   string public message;
@@ -73,7 +73,7 @@ contract Hello {
 }
 ```
 /truffle/migration/1_initial_migration.js
-```
+``` js
 var Migrations = artifacts.require("Migrations");
 var Hello = artifacts.require("test");
 
@@ -104,7 +104,7 @@ Create a folder for chainlink data
 > mkdir chainLink-eth
 
 Create a config.toml for configuration
-``` 
+``` bash
 
 IP=$(ip -4 addr show enp0s3 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
 
@@ -136,7 +136,7 @@ HTTPURL = 'http://$IP:8000'
 ```
 
 Create srcrets.tomp for postgreSQL
-```
+``` bash
 echo "[Password]
 Keystore = 'Trideptrai123456789'
 [Database]
@@ -150,7 +150,7 @@ URL = 'postgresql://postgres:Trideptrai123456789@host.docker.internal:5432/postg
 > docker run --platform linux/x86_64/v8 --name chainlink -v .:/chainlink -it -p 6688:6688 --add-host=host.docker.internal:host-gateway smartcontract/chainlink:2.0.0 node -config /chainlink/config.toml -secrets /chainlink/secrets.toml start
 
 ## add job
-```
+``` toml
 type            = "cron"
 schemaVersion   = 1
 schedule = "CRON_TZ=UTC 0 0 1 1 * *"
@@ -186,4 +186,54 @@ curl -X POST -H 'Content-Type: application/json' -d @job.toml http://localhost:6
 > curl -X POST http://localhost:6688/v2/specs/:id
 
 ## Smart contract chainlink
+### Migrating a Chainlink Contract
+
+To migrate a Chainlink contract using Truffle, follow these steps:
+
+1. **Install Chainlink contracts:** If you haven't already done so, install the Chainlink contracts in your project using npm:
+
+> npm install @chainlink/contracts
+
+2. **Create a migration file:** Create a new migration file in the migrations directory of your Truffle project. This file should import your contract and the Chainlink contract, and then deploy them using the deployer.deploy function.
+Here's an example of what your migration file might look like if you're deploying a contract that uses the ChainlinkClient contract:
+``` js
+const MyContract = artifacts.require('MyContract');
+const { LinkToken } = require('@chainlink/contracts/truffle/v0.8/LinkToken');
+
+module.exports = async (deployer) => {
+  await deployer.deploy(LinkToken);
+  const linkToken = await LinkToken.deployed();
+  await deployer.deploy(MyContract, linkToken.address);
+};
+```
+In this example, MyContract is the name of your contract, and LinkToken is the Chainlink contract. Replace MyContract with the actual name of your contract.
+
+3. **Update your Truffle configuration:** Update your truffle-config.js file to specify the network you want to deploy to. Here's an example of how you can do this:
+
+``` js
+module.exports = {
+  networks: {
+    development: {
+      host: "192.168.3.66",     // Localhost
+      port: 8000,            // Standard Ethereum port
+      network_id: "*",       // Any network
+    },
+  },
+  // ...
+};
+```
+4. **Run the migration:** Run the migration using the truffle migrate command:
+This command compiles your contracts (if they haven't been compiled already), deploys them to the network specified in your Truffle configuration, and runs any migration scripts you've created.
+
+> truffle migrate
+
+Remember to replace MyContract with the actual name of your contract, and update the truffle-config.js file with the correct network details.
+
+
+install Chainlink package
+> npm install @chainlink/contracts
+
 > docker pull smartcontract/chainlink:1.11.0
+
+## Job chainlink
+The job need to clarify the oracle contract address
