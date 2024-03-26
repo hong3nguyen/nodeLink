@@ -38,6 +38,7 @@ Either way, try
 
 > miner.setEtherbase(eth.accounts[0])
 
+> web3.personal.unlockAccount(web3.personal.listAccounts[0],"alan132",15000);
 ### Start stop mining with
 
 > miner.start()
