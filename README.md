@@ -14,7 +14,7 @@
 ## execute Ethereum or Ethereum client from Link view
 > IP=$(ip -4 addr show enp0s3 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
 > 
-> ./geth_run/geth --identity "node00" --http --http.addr $IP --http.port "8000" --http.corsdomain "*" --datadir . --port "30303" --nodiscover --http.api "eth,debug,net,web3,personal,miner,admin" --ws --ws.addr $IP --ws.port 8546 --networkid 2024 --nat "any" --allow-insecure-unlock --rpc.gascap "999999" --ipcpath=~/Pictures/
+> ./geth_run/geth --identity "node00" --http --http.addr $IP --http.port "8000" --http.corsdomain "*" --datadir . --port "30303" --nodiscover --http.api "eth,debug,net,web3,personal,miner,admin" --ws --ws.addr $IP --ws.port 8546 --networkid 2024 --nat "any" --allow-insecure-unlock  --ipcpath=~/Pictures/
 
 ## console to each node
 > ./geth_run/geth attach http://$IP:8000

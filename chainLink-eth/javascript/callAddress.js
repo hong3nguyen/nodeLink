@@ -20,13 +20,6 @@ const contractAddress = '0xA253e5A8E365f12C5dFF86b9F3e948e11d42f3B1';
 const contract = new web3.eth.Contract(abi, contractAddress);
 
 // Call the RequestAddress function
-// contract.methods.RequestAddress().send({ from: '0x1b792475319e97186f676bea61280388c0a12e7a' })
-//   .on('receipt', console.log)
-//   .on('error', console.error);
-
-contract.methods.RequestAddress().send({
-  from: '0x1b792475319e97186f676bea61280388c0a12e7a',
-  gasPrice: '20000000000' // 20 Gwei
-})
+contract.methods.RequestAddress().send({ from: '0x1b792475319e97186f676bea61280388c0a12e7a' })
   .on('receipt', console.log)
   .on('error', console.error);
