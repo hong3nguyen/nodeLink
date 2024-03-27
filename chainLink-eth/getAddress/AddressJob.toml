@@ -4,7 +4,7 @@ name = "GLINK-ETH [DR] (Get > Address)"
 externalJobID = "12ebf2f1-c3d4-41c4-b107-28a70bccecc2"
 forwardingAllowed = false
 maxTaskDuration = "0s"
-contractAddress = "0x1db329cDE457D68B872766F4e12F9532BCA9149b"
+contractAddress = "0x26fd5013A99bA26505C03D47D0D61Cc66062f071"
 minContractPaymentLinkJuels = "1400000000000000000"
 observationSource = """
     decode_log   [type="ethabidecodelog"
@@ -20,7 +20,7 @@ observationSource = """
                       abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
                       data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"
                     ]
-    submit_tx    [type="ethtx" to="0x1db329cDE457D68B872766F4e12F9532BCA9149b" data="$(encode_tx)"]
+    submit_tx    [type="ethtx" to="0x26fd5013A99bA26505C03D47D0D61Cc66062f071" data="$(encode_tx)"]
 
     decode_log -> decode_cbor -> fetch -> parse -> encode_data -> encode_tx -> submit_tx
 """

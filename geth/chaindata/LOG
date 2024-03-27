@@ -1,44 +1,30 @@
-=============== Mar 21, 2024 (EET) ===============
-16:24:04.192330 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-16:24:04.215268 db@open opening
-16:24:04.227715 version@stat F·[] S·0B[] Sc·[]
-16:24:04.230814 db@janitor F·2 G·0
-16:24:04.231661 db@open done T·16.211006ms
-16:24:04.248033 db@close closing
-16:24:04.248919 db@close done T·882.7µs
-=============== Mar 21, 2024 (EET) ===============
-16:24:14.129712 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-16:24:14.137196 version@stat F·[] S·0B[] Sc·[]
-16:24:14.137541 db@open opening
-16:24:14.138999 journal@recovery F·1
-16:24:14.141608 journal@recovery recovering @1
-16:24:14.156733 memdb@flush created L0@2 N·10 S·595B "H\x03\x19..k\x9d\xd5,v3":"r\x00\x00..k\x9d\xd5,v5"
-16:24:14.161153 version@stat F·[1] S·595B[595B] Sc·[0.25]
-16:24:14.187674 db@janitor F·3 G·0
-16:24:14.187977 db@open done T·50.333347ms
-=============== Mar 25, 2024 (EET) ===============
-16:45:40.370685 db@close closing
-16:45:40.372103 db@close done T·1.417354ms
-=============== Mar 25, 2024 (EET) ===============
-16:45:49.926217 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-16:45:49.938667 version@stat F·[1] S·595B[595B] Sc·[0.25]
-16:45:49.939032 db@open opening
-16:45:49.940953 journal@recovery F·1
-16:45:49.945214 journal@recovery recovering @3
-16:45:49.961034 memdb@flush created L0@5 N·609 S·32KiB "5\"\xc6..\x95\x0f\xdf,v618":"\xeda\xfc..\x01\x8a\x12,v619"
-16:45:49.967505 version@stat F·[2] S·33KiB[33KiB] Sc·[0.50]
-16:45:49.986815 db@janitor F·4 G·0
-16:45:49.987348 db@open done T·48.166397ms
-=============== Mar 25, 2024 (EET) ===============
-19:21:58.446467 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-19:21:58.467473 version@stat F·[2] S·33KiB[33KiB] Sc·[0.50]
-19:21:58.467942 db@open opening
-19:21:58.469897 journal@recovery F·1
-19:21:58.476654 journal@recovery recovering @6
-19:21:58.513131 memdb@flush created L0@8 N·2888 S·175KiB "H\x01\x15..*fW,v1909":"unc..own,v622"
-19:21:58.519566 version@stat F·[3] S·208KiB[208KiB] Sc·[0.75]
-19:21:58.545364 db@janitor F·5 G·0
-19:21:58.545714 db@open done T·77.675032ms
-=============== Mar 26, 2024 (EET) ===============
-10:14:52.057178 db@close closing
-10:14:52.058947 db@close done T·1.766428ms
+=============== Mar 27, 2024 (EET) ===============
+10:10:48.276497 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+10:10:48.298103 db@open opening
+10:10:48.309765 version@stat F·[] S·0B[] Sc·[]
+10:10:48.314510 db@janitor F·2 G·0
+10:10:48.314954 db@open done T·16.651398ms
+10:10:48.324783 db@close closing
+10:10:48.326155 db@close done T·1.363705ms
+=============== Mar 27, 2024 (EET) ===============
+10:12:42.375854 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+10:12:42.382087 version@stat F·[] S·0B[] Sc·[]
+10:12:42.382707 db@open opening
+10:12:42.384301 journal@recovery F·1
+10:12:42.389276 journal@recovery recovering @1
+10:12:42.395729 memdb@flush created L0@2 N·10 S·640B "HNS..ը\xd2,v3":"r\x00\x00..ը\xd2,v5"
+10:12:42.402922 version@stat F·[1] S·640B[640B] Sc·[0.25]
+10:12:42.436499 db@janitor F·3 G·0
+10:12:42.436777 db@open done T·53.945667ms
+17:02:54.638947 db@close closing
+17:02:54.640598 db@close done T·1.637936ms
+=============== Mar 27, 2024 (EET) ===============
+17:03:12.484087 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+17:03:12.497073 version@stat F·[1] S·640B[640B] Sc·[0.25]
+17:03:12.497629 db@open opening
+17:03:12.499121 journal@recovery F·1
+17:03:12.502270 journal@recovery recovering @3
+17:03:12.576651 memdb@flush created L0@5 N·13729 S·800KiB "\a\x1b\x01..\x12I\xb5,v13704":"\xfb\x94\x13..;\xc9X,v13662"
+17:03:12.579928 version@stat F·[2] S·801KiB[801KiB] Sc·[0.50]
+17:03:12.600845 db@janitor F·4 G·0
+17:03:12.601495 db@open done T·103.686602ms

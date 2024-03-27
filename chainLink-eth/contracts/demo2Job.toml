@@ -1,0 +1,40 @@
+type = "directrequest"
+schemaVersion = 1
+name = "Fetch Weather Data"
+contractAddress = "0x26fd5013A99bA26505C03D47D0D61Cc66062f071"
+externalJobID = "12ebf2f1-c3d4-41c4-b107-28a70bccecc8"
+maxTaskDuration = "0s"
+observationSource = """
+    fetch    [type="http" method=GET url="https://api.weatherapi.com/v1/current.json"];
+    parse    [type="jsonparse" path="current,temp_c"];
+    multiply [type="multiply" times=100];
+    encode   [type="ethabiencode" 
+                abi="(bytes32 requestId, int256 temperature)" 
+                data="{\"requestId\": $(fetch.requestId), \"temperature\": $(multiply)}"
+             ];
+    tx       [type="ethtx" to="0x26fd5013A99bA26505C03D47D0D61Cc66062f071" data="$(encode)"];
+    fetch -> parse -> multiply -> encode -> tx;
+"""
+
+observationSource = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor     [type="cborparse" data="$(decode_log.data)"]
+    fetch           [type="http" method=GET url="$(decode_cbor.get)"]
+    parse           [type="jsonparse" path="$(decode_cbor.path)" data="$(fetch)"]
+    multiply        [type="multiply" input="$(parse)" times=100]  # Assuming we need to adjust the scale of the temperature
+    encode_data     [type="ethabiencode"
+                      abi="(bytes32 requestId, int256 temperature)"  # Adjust according to your contract's fulfillment function
+                      data="{\\"requestId\\": $(decode_log.requestId), \\"temperature\\": $(multiply)}"]
+    encode_tx       [type="ethabiencode"
+                      abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
+                      data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"
+                    ]
+    submit_tx    [type="ethtx" to="0x26fd5013A99bA26505C03D47D0D61Cc66062f071" data="$(encode_tx)"]
+
+    decode_log -> decode_cbor -> fetch -> parse -> multiply -> encode_data -> encode_tx -> submit_tx
+"""
+

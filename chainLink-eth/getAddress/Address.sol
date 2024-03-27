@@ -33,8 +33,9 @@ contract getAddressTemplate is ChainlinkClient {
     public
   {
     Chainlink.Request memory req = buildChainlinkRequest(externalJobId, address(this), this.fulfillAddress.selector);
-    req.add("get", "https://your_API_endpoint_url");
-    req.add("path1", "data,results");
+    // req.add("get", "https://your_API_endpoint_url");
+    // req.add("path1", "data,results");
+    //req.add("get", "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd");
     sendOperatorRequest(req, oraclePayment);
   }
 
