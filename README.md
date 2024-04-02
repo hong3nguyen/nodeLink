@@ -14,7 +14,7 @@
 ## execute Ethereum or Ethereum client from Link view
 > IP=$(ip -4 addr show enp0s3 | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
 > 
-> ./geth_run/geth --identity "node00" --http --http.addr $IP --http.port "8000" --http.corsdomain "*" --datadir . --port "30303" --nodiscover --http.api "eth,debug,net,web3,personal,miner,admin" --ws --ws.addr $IP --ws.port 8546 --networkid 2024 --nat "any" --allow-insecure-unlock  --rpc.gascap "999999" --ipcpath=~/Pictures/
+> ./geth_run/geth --identity "node00" --http --http.addr $IP --http.port "8000" --http.corsdomain "*" --datadir . --port "30303" --nodiscover --http.api "eth,debug,net,web3,personal,miner,admin" --ws --ws.addr $IP --ws.port 8546 --networkid 2024 --nat "any" --allow-insecure-unlock  --rpc.gascap "99999999999999999" --ipcpath=~/Pictures/
 
 ## console to each node
 > ./geth_run/geth attach http://$IP:8000
@@ -24,6 +24,15 @@
 
 ### take information from a peer
 > admin.nodeInfo.enode
+
+##  send a transaction between two accounts
+
+> eth.sendTransaction({from: eth.acconts[0], to: eth.accounts[1], value: web3.toWei(1, "ether")})
+### Set balance to account recive the money for all nodes
+> miner.setEtherbase(eth.accounts[0])
+
+### Unlock account in the first node
+> web3.personal.unlockAccount(web3.personal.listAccounts[0],"",15000);
 
 ## add a computer to the network [add Peer to netwokr](https://ethereum.stackexchange.com/questions/43045/how-to-connect-another-node-to-my-own-private-network)
 
@@ -246,3 +255,13 @@ The job need to clarify the oracle contract address
 
 
 #### Need to send eth from the network to chainlink
+
+### Check LINK amount
+``` js
+let linkAbi = 
+let linkAddress = 
+let accountAddress =  
+let linkTokenContract = new web3.eth.Contract(linkAbi,linkAddress);
+let balance = await linkTokenContract.methods.balanceOf(accountAddress).call();
+console.log("LINK balance is: ", web3.utils.fromWei(balance, 'ether'));
+```

@@ -19,8 +19,8 @@ contract WeatherContract is ChainlinkClient {
 
     constructor() {
         //setPublicChainlinkToken(); // Set the LINK token contract address
-        setChainlinkToken(0xB6eFca1fcDDbb3E1950d1AaC422f9CC913Cc602e);
-        setChainlinkOracle(0x26fd5013A99bA26505C03D47D0D61Cc66062f071);
+        setChainlinkToken(0x0E3c944F32BCc729D292F8F0F552145332011104);
+        setChainlinkOracle(0xe15e23a8ba28745623382a54b999145C49E70bF9);
         jobId = "12ebf2f1c3d441c4b10728a70bccecc8";
         fee = 0.1 * 10 ** 18; // 0.1 LINK
     }

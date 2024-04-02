@@ -11,17 +11,15 @@ web3.eth.net.isListening()
     .catch(e => console.log(e));
 
 // Get the contract ABI
-const abi = JSON.parse(fs.readFileSync('../build/contracts/WeatherContract.json', 'utf8')).abi;
+const abi = JSON.parse(fs.readFileSync('../build/contracts/getBoolTemplate.json', 'utf8')).abi;
 
 // Get the contract address
-const contractAddress = '0xed306eeE724202EF30d88a04918f794EA36272c4';
+const contractAddress = '0x03b7c7CC00e76874d445490cfe63B64b79eFb961';
 
 // Create a new contract instance
 const contract = new web3.eth.Contract(abi, contractAddress);
 
 const accountAddress = '0x1B792475319E97186F676Bea61280388C0A12E7a';
-
-const city = "London"; // Example parameter, adjust based on your contract
 
 web3.eth.getAccounts().then(accounts => {
   // Ensure accounts are loaded and you have an account to use
@@ -29,13 +27,9 @@ web3.eth.getAccounts().then(accounts => {
   
   console.log("does it work")
 
-  contract.methods.requestTemperatureData(city,  { gas: 6721975 }).estimateGas({ from: fromAccount })
-    .then(gasAmount => {
-      console.log('Estimated gas amount:', gasAmount);
-      return contract.methods.requestTemperatureData(city).send({ from: fromAccount, gas: gasAmount });
-    })
+  contract.methods.requestBool().send({ from: fromAccount })
     .then(receipt => console.log('Receipt:', receipt))
-    .catch(console.error);
-}).catch(error => {
+    .catch(error => {
   console.error('An error occurred:', error);
+});
 });
