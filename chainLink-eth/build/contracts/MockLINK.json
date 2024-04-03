@@ -11708,12 +11708,12 @@
         }
       },
       "links": {},
-      "address": "0x3f5CBA916576A6Ce277dA066fD210D895a595F71",
-      "transactionHash": "0xe5a12219772b75b9556c5bb8ad95bfdcf7121a0819a0017cd84cc8bc4e6c95dd"
+      "address": "0x0006f26f6489eA3b3f58BCDaFb65271a30130FdB",
+      "transactionHash": "0x82e0ceacda5c884ee5b3e8a2fa800169e7f08633d12e0549257805c99eb8e767"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2024-04-02T15:23:39.124Z",
+  "updatedAt": "2024-04-03T06:44:53.987Z",
   "networkType": "ethereum",
   "devdoc": {
     "details": "Mock LINK Token for testing and development. This token is a standard ERC20 token that can be used for simulating Chainlink token interactions in a private Ethereum network.",

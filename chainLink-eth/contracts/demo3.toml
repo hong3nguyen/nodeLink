@@ -1,8 +1,7 @@
 type = "directrequest"
 schemaVersion = 1
 name = "Get ETH Volume"
-contractAddress = "0x0006f26f6489eA3b3f58BCDaFb65271a30130FdB"
-externalJobID = "5949a39a-b5dd-4263-92a9-670a9848e7ag"
+contractAddress = "0x88e384AcF40052Ab9A59a1752560c295151e2240"
 maxTaskDuration = "0s"
 observationSource = """
     decode_log   [type="ethabidecodelog"
@@ -18,7 +17,7 @@ observationSource = """
                   abi="fulfillOracleRequest(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes32 data)"
                   data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"
                  ]
-    submit_tx    [type="ethtx" to="$(jobSpec.contractAddress)" data="$(encode_tx)"]
+    submit_tx    [type="ethtx" to="0x88e384AcF40052Ab9A59a1752560c295151e2240" data="$(encode_tx)"]
 
     decode_log -> decode_cbor -> fetch -> parse -> encode_data -> encode_tx -> submit_tx
 """

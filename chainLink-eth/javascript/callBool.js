@@ -14,7 +14,7 @@ web3.eth.net.isListening()
 const abi = JSON.parse(fs.readFileSync('../build/contracts/getBoolTemplate.json', 'utf8')).abi;
 
 // Get the contract address
-const contractAddress = '0x03b7c7CC00e76874d445490cfe63B64b79eFb961';
+const contractAddress = '0x79cc5DA46Dea9c1bd22a6C9651471e9C25275E72';
 
 // Create a new contract instance
 const contract = new web3.eth.Contract(abi, contractAddress);

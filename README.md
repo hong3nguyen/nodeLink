@@ -50,7 +50,7 @@ miner.setEtherbase(eth.accounts[0])
 
 web3.personal.unlockAccount(web3.personal.listAccounts[0],"alan132",15000);
 
-eth.sendTransaction({from: eth.acconts[0], to: eth.accounts[1], value: web3.toWei(1, "ether")})
+eth.sendTransaction({from: eth.accounts[0], to: eth.accounts[1], value: web3.toWei(1, "ether")})
 
 ```
 ### Start stop mining with
@@ -265,3 +265,13 @@ let linkTokenContract = new web3.eth.Contract(linkAbi,linkAddress);
 let balance = await linkTokenContract.methods.balanceOf(accountAddress).call();
 console.log("LINK balance is: ", web3.utils.fromWei(balance, 'ether'));
 ```
+
+
+Token Contract: This is the smart contract that governs the behavior of a token, such as LINK. It includes functions to transfer tokens, check balances, and so on.
+
+Chainlink Oracle Contract: This is the smart contract that Chainlink nodes interact with to receive data requests and send responses. When your custom contract wants to make a data request, it sends the request to the Oracle contract. The Chainlink node listens for these requests on the Oracle contract, performs the requested job, and sends the data back to your contract through the Oracle contract.
+
+Custom Contract: This is the contract you write and deploy. It interacts with the Chainlink Oracle contract to request data. It specifies the job it wants to run (by job ID), the data it wants, and the amount of LINK it's willing to pay for the data.
+
+
+npx hardhat run scripts/deploy.js --network localhost

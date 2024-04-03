@@ -3,7 +3,7 @@ RootDir = '~/.chainlink' # Default
 ShutdownGracePeriod = '5s' # Default
 
 [Log]
-Level = 'warn'
+Level = 'info'
 
 [WebServer]
 AllowOrigins = '\*'
@@ -14,6 +14,10 @@ HTTPSPort = 0
 
 [[EVM]]
 ChainID = '2024'
+LinkContractAddress = '0x3f5CBA916576A6Ce277dA066fD210D895a595F71' # Example
+MinContractPayment = '0.1 link'
+
+
 
 [[EVM.Nodes]]
 Name = 'node00'
