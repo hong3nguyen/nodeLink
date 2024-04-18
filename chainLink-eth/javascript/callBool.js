@@ -32,4 +32,5 @@ web3.eth.getAccounts().then(accounts => {
     .catch(error => {
   console.error('An error occurred:', error);
 });
+console.log("does it work");
 });
