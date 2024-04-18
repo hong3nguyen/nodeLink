@@ -22,6 +22,10 @@ observationSource = """
     decode_log -> decode_cbor -> fetch -> parse -> encode_data -> encode_tx -> submit_tx
 """
 
+encode_tx    [type="ethabiencode"
+              abi="fulfillOracleRequest(bytes32 requestId, bytes32 data)"
+              data="{\\"requestId\\": $(decode_log.requestId), \\"data\\": $(encode_data)}"
+             ]
 
 type = "directrequest"
 schemaVersion = 1

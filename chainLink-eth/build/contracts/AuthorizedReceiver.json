@@ -1,0 +1,3942 @@
+{
+  "contractName": "AuthorizedReceiver",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address[]",
+          "name": "senders",
+          "type": "address[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "changedBy",
+          "type": "address"
+        }
+      ],
+      "name": "AuthorizedSendersChanged",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "senders",
+          "type": "address[]"
+        }
+      ],
+      "name": "setAuthorizedSenders",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAuthorizedSenders",
+      "outputs": [
+        {
+          "internalType": "address[]",
+          "name": "",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "isAuthorizedSender",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"senders\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"changedBy\",\"type\":\"address\"}],\"name\":\"AuthorizedSendersChanged\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"getAuthorizedSenders\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"isAuthorizedSender\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"senders\",\"type\":\"address[]\"}],\"name\":\"setAuthorizedSenders\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"getAuthorizedSenders()\":{\"returns\":{\"_0\":\"array of addresses\"}},\"isAuthorizedSender(address)\":{\"params\":{\"sender\":\"The address of the Chainlink node\"},\"returns\":{\"_0\":\"The authorization status of the node\"}},\"setAuthorizedSenders(address[])\":{\"params\":{\"senders\":\"The addresses of the authorized Chainlink node\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"getAuthorizedSenders()\":{\"notice\":\"Retrieve a list of authorized senders\"},\"isAuthorizedSender(address)\":{\"notice\":\"Use this to check if a node is authorized for fulfilling requests\"},\"setAuthorizedSenders(address[])\":{\"notice\":\"Sets the fulfillment permission for a given node. Use `true` to allow, `false` to disallow.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"@chainlink/contracts/src/v0.7/AuthorizedReceiver.sol\":\"AuthorizedReceiver\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"@chainlink/contracts/src/v0.7/AuthorizedReceiver.sol\":{\"keccak256\":\"0xd5c4c5246744c9c3d2445298e5bdc38ff4c2ca744ca4167cef01ea11c09ba5c7\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://665cfac376f9fc7554788118a491066d71f9e5bd6f3114789d449d001cc1aff3\",\"dweb:/ipfs/QmS3JbdU5Z94wUhNCNwG4bbGuxLJBNjaqZ2XunEvJ9tqNr\"]},\"@chainlink/contracts/src/v0.7/interfaces/AuthorizedReceiverInterface.sol\":{\"keccak256\":\"0x4276ccbc637409ab07d9baab0b72806aac938d5f180fe8bc186f64d5d376ba4e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://71a8ed40faa2f8fea03a8e55c6534c22bec374d134af2ea9a4a1f852b959b0c3\",\"dweb:/ipfs/QmYc4WRpNBMr2aC2srcdyCdhGcCEPt1k7LRY8Z3YnDAbwM\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.7.0;\n\nimport \"./interfaces/AuthorizedReceiverInterface.sol\";\n\nabstract contract AuthorizedReceiver is AuthorizedReceiverInterface {\n  mapping(address => bool) private s_authorizedSenders;\n  address[] private s_authorizedSenderList;\n\n  event AuthorizedSendersChanged(address[] senders, address changedBy);\n\n  /**\n   * @notice Sets the fulfillment permission for a given node. Use `true` to allow, `false` to disallow.\n   * @param senders The addresses of the authorized Chainlink node\n   */\n  function setAuthorizedSenders(address[] calldata senders) external override validateAuthorizedSenderSetter {\n    require(senders.length > 0, \"Must have at least 1 authorized sender\");\n    // Set previous authorized senders to false\n    uint256 authorizedSendersLength = s_authorizedSenderList.length;\n    for (uint256 i = 0; i < authorizedSendersLength; i++) {\n      s_authorizedSenders[s_authorizedSenderList[i]] = false;\n    }\n    // Set new to true\n    for (uint256 i = 0; i < senders.length; i++) {\n      s_authorizedSenders[senders[i]] = true;\n    }\n    // Replace list\n    s_authorizedSenderList = senders;\n    emit AuthorizedSendersChanged(senders, msg.sender);\n  }\n\n  /**\n   * @notice Retrieve a list of authorized senders\n   * @return array of addresses\n   */\n  function getAuthorizedSenders() external view override returns (address[] memory) {\n    return s_authorizedSenderList;\n  }\n\n  /**\n   * @notice Use this to check if a node is authorized for fulfilling requests\n   * @param sender The address of the Chainlink node\n   * @return The authorization status of the node\n   */\n  function isAuthorizedSender(address sender) public view override returns (bool) {\n    return s_authorizedSenders[sender];\n  }\n\n  /**\n   * @notice customizable guard of who can update the authorized sender list\n   * @return bool whether sender can update authorized sender list\n   */\n  function _canSetAuthorizedSenders() internal virtual returns (bool);\n\n  /**\n   * @notice validates the sender is an authorized sender\n   */\n  function _validateIsAuthorizedSender() internal view {\n    require(isAuthorizedSender(msg.sender), \"Not authorized sender\");\n  }\n\n  /**\n   * @notice prevents non-authorized addresses from calling this method\n   */\n  modifier validateAuthorizedSender() {\n    _validateIsAuthorizedSender();\n    _;\n  }\n\n  /**\n   * @notice prevents non-authorized addresses from calling this method\n   */\n  modifier validateAuthorizedSenderSetter() {\n    require(_canSetAuthorizedSenders(), \"Cannot set authorized senders\");\n    _;\n  }\n}\n",
+  "sourcePath": "@chainlink/contracts/src/v0.7/AuthorizedReceiver.sol",
+  "ast": {
+    "absolutePath": "@chainlink/contracts/src/v0.7/AuthorizedReceiver.sol",
+    "exportedSymbols": {
+      "AuthorizedReceiver": [
+        157
+      ],
+      "AuthorizedReceiverInterface": [
+        439
+      ]
+    },
+    "id": 158,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "^",
+          "0.7",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:23:0"
+      },
+      {
+        "absolutePath": "@chainlink/contracts/src/v0.7/interfaces/AuthorizedReceiverInterface.sol",
+        "file": "./interfaces/AuthorizedReceiverInterface.sol",
+        "id": 2,
+        "nodeType": "ImportDirective",
+        "scope": 158,
+        "sourceUnit": 440,
+        "src": "57:54:0",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": true,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 3,
+              "name": "AuthorizedReceiverInterface",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 439,
+              "src": "153:27:0",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_AuthorizedReceiverInterface_$439",
+                "typeString": "contract AuthorizedReceiverInterface"
+              }
+            },
+            "id": 4,
+            "nodeType": "InheritanceSpecifier",
+            "src": "153:27:0"
+          }
+        ],
+        "contractDependencies": [
+          439
+        ],
+        "contractKind": "contract",
+        "fullyImplemented": false,
+        "id": 157,
+        "linearizedBaseContracts": [
+          157,
+          439
+        ],
+        "name": "AuthorizedReceiver",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 8,
+            "mutability": "mutable",
+            "name": "s_authorizedSenders",
+            "nodeType": "VariableDeclaration",
+            "scope": 157,
+            "src": "185:52:0",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+              "typeString": "mapping(address => bool)"
+            },
+            "typeName": {
+              "id": 7,
+              "keyType": {
+                "id": 5,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "193:7:0",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "185:24:0",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+                "typeString": "mapping(address => bool)"
+              },
+              "valueType": {
+                "id": 6,
+                "name": "bool",
+                "nodeType": "ElementaryTypeName",
+                "src": "204:4:0",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                }
+              }
+            },
+            "visibility": "private"
+          },
+          {
+            "constant": false,
+            "id": 11,
+            "mutability": "mutable",
+            "name": "s_authorizedSenderList",
+            "nodeType": "VariableDeclaration",
+            "scope": 157,
+            "src": "241:40:0",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_array$_t_address_$dyn_storage",
+              "typeString": "address[]"
+            },
+            "typeName": {
+              "baseType": {
+                "id": 9,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "241:7:0",
+                "stateMutability": "nonpayable",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "id": 10,
+              "nodeType": "ArrayTypeName",
+              "src": "241:9:0",
+              "typeDescriptions": {
+                "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                "typeString": "address[]"
+              }
+            },
+            "visibility": "private"
+          },
+          {
+            "anonymous": false,
+            "id": 18,
+            "name": "AuthorizedSendersChanged",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 17,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 14,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "senders",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 18,
+                  "src": "317:17:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 12,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "317:7:0",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 13,
+                    "nodeType": "ArrayTypeName",
+                    "src": "317:9:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 16,
+                  "indexed": false,
+                  "mutability": "mutable",
+                  "name": "changedBy",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 18,
+                  "src": "336:17:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 15,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "336:7:0",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "316:38:0"
+            },
+            "src": "286:69:0"
+          },
+          {
+            "baseFunctions": [
+              438
+            ],
+            "body": {
+              "id": 92,
+              "nodeType": "Block",
+              "src": "650:565:0",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "commonType": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "id": 32,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "expression": {
+                            "id": 29,
+                            "name": "senders",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 22,
+                            "src": "664:7:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
+                              "typeString": "address[] calldata"
+                            }
+                          },
+                          "id": 30,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "length",
+                          "nodeType": "MemberAccess",
+                          "src": "664:14:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": ">",
+                        "rightExpression": {
+                          "hexValue": "30",
+                          "id": 31,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "number",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "681:1:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_rational_0_by_1",
+                            "typeString": "int_const 0"
+                          },
+                          "value": "0"
+                        },
+                        "src": "664:18:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4d7573742068617665206174206c65617374203120617574686f72697a65642073656e646572",
+                        "id": 33,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "684:40:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_14acbd13c311ce77adbf2abb2c29118807e2efa37eb8080b0a33366f8bd4c4af",
+                          "typeString": "literal_string \"Must have at least 1 authorized sender\""
+                        },
+                        "value": "Must have at least 1 authorized sender"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_14acbd13c311ce77adbf2abb2c29118807e2efa37eb8080b0a33366f8bd4c4af",
+                          "typeString": "literal_string \"Must have at least 1 authorized sender\""
+                        }
+                      ],
+                      "id": 28,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "656:7:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 34,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "656:69:0",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 35,
+                  "nodeType": "ExpressionStatement",
+                  "src": "656:69:0"
+                },
+                {
+                  "assignments": [
+                    37
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 37,
+                      "mutability": "mutable",
+                      "name": "authorizedSendersLength",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 92,
+                      "src": "779:31:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 36,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "779:7:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 40,
+                  "initialValue": {
+                    "expression": {
+                      "id": 38,
+                      "name": "s_authorizedSenderList",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 11,
+                      "src": "813:22:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_array$_t_address_$dyn_storage",
+                        "typeString": "address[] storage ref"
+                      }
+                    },
+                    "id": 39,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "memberName": "length",
+                    "nodeType": "MemberAccess",
+                    "src": "813:29:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "779:63:0"
+                },
+                {
+                  "body": {
+                    "id": 59,
+                    "nodeType": "Block",
+                    "src": "902:69:0",
+                    "statements": [
+                      {
+                        "expression": {
+                          "id": 57,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
+                            "baseExpression": {
+                              "id": 51,
+                              "name": "s_authorizedSenders",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 8,
+                              "src": "910:19:0",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+                                "typeString": "mapping(address => bool)"
+                              }
+                            },
+                            "id": 55,
+                            "indexExpression": {
+                              "baseExpression": {
+                                "id": 52,
+                                "name": "s_authorizedSenderList",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 11,
+                                "src": "930:22:0",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_array$_t_address_$dyn_storage",
+                                  "typeString": "address[] storage ref"
+                                }
+                              },
+                              "id": 54,
+                              "indexExpression": {
+                                "id": 53,
+                                "name": "i",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 42,
+                                "src": "953:1:0",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_uint256",
+                                  "typeString": "uint256"
+                                }
+                              },
+                              "isConstant": false,
+                              "isLValue": true,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "nodeType": "IndexAccess",
+                              "src": "930:25:0",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_address",
+                                "typeString": "address"
+                              }
+                            },
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": true,
+                            "nodeType": "IndexAccess",
+                            "src": "910:46:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bool",
+                              "typeString": "bool"
+                            }
+                          },
+                          "nodeType": "Assignment",
+                          "operator": "=",
+                          "rightHandSide": {
+                            "hexValue": "66616c7365",
+                            "id": 56,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "bool",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "959:5:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bool",
+                              "typeString": "bool"
+                            },
+                            "value": "false"
+                          },
+                          "src": "910:54:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        },
+                        "id": 58,
+                        "nodeType": "ExpressionStatement",
+                        "src": "910:54:0"
+                      }
+                    ]
+                  },
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    },
+                    "id": 47,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "id": 45,
+                      "name": "i",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 42,
+                      "src": "868:1:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "<",
+                    "rightExpression": {
+                      "id": 46,
+                      "name": "authorizedSendersLength",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 37,
+                      "src": "872:23:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "868:27:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 60,
+                  "initializationExpression": {
+                    "assignments": [
+                      42
+                    ],
+                    "declarations": [
+                      {
+                        "constant": false,
+                        "id": 42,
+                        "mutability": "mutable",
+                        "name": "i",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 60,
+                        "src": "853:9:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 41,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "853:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "id": 44,
+                    "initialValue": {
+                      "hexValue": "30",
+                      "id": 43,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "865:1:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "nodeType": "VariableDeclarationStatement",
+                    "src": "853:13:0"
+                  },
+                  "loopExpression": {
+                    "expression": {
+                      "id": 49,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "UnaryOperation",
+                      "operator": "++",
+                      "prefix": false,
+                      "src": "897:3:0",
+                      "subExpression": {
+                        "id": 48,
+                        "name": "i",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 42,
+                        "src": "897:1:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 50,
+                    "nodeType": "ExpressionStatement",
+                    "src": "897:3:0"
+                  },
+                  "nodeType": "ForStatement",
+                  "src": "848:123:0"
+                },
+                {
+                  "body": {
+                    "id": 80,
+                    "nodeType": "Block",
+                    "src": "1044:53:0",
+                    "statements": [
+                      {
+                        "expression": {
+                          "id": 78,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
+                            "baseExpression": {
+                              "id": 72,
+                              "name": "s_authorizedSenders",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 8,
+                              "src": "1052:19:0",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+                                "typeString": "mapping(address => bool)"
+                              }
+                            },
+                            "id": 76,
+                            "indexExpression": {
+                              "baseExpression": {
+                                "id": 73,
+                                "name": "senders",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 22,
+                                "src": "1072:7:0",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
+                                  "typeString": "address[] calldata"
+                                }
+                              },
+                              "id": 75,
+                              "indexExpression": {
+                                "id": 74,
+                                "name": "i",
+                                "nodeType": "Identifier",
+                                "overloadedDeclarations": [],
+                                "referencedDeclaration": 62,
+                                "src": "1080:1:0",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_uint256",
+                                  "typeString": "uint256"
+                                }
+                              },
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "nodeType": "IndexAccess",
+                              "src": "1072:10:0",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_address",
+                                "typeString": "address"
+                              }
+                            },
+                            "isConstant": false,
+                            "isLValue": true,
+                            "isPure": false,
+                            "lValueRequested": true,
+                            "nodeType": "IndexAccess",
+                            "src": "1052:31:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bool",
+                              "typeString": "bool"
+                            }
+                          },
+                          "nodeType": "Assignment",
+                          "operator": "=",
+                          "rightHandSide": {
+                            "hexValue": "74727565",
+                            "id": 77,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": true,
+                            "kind": "bool",
+                            "lValueRequested": false,
+                            "nodeType": "Literal",
+                            "src": "1086:4:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_bool",
+                              "typeString": "bool"
+                            },
+                            "value": "true"
+                          },
+                          "src": "1052:38:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        },
+                        "id": 79,
+                        "nodeType": "ExpressionStatement",
+                        "src": "1052:38:0"
+                      }
+                    ]
+                  },
+                  "condition": {
+                    "commonType": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    },
+                    "id": 68,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "id": 65,
+                      "name": "i",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 62,
+                      "src": "1019:1:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "<",
+                    "rightExpression": {
+                      "expression": {
+                        "id": 66,
+                        "name": "senders",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 22,
+                        "src": "1023:7:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
+                          "typeString": "address[] calldata"
+                        }
+                      },
+                      "id": 67,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "length",
+                      "nodeType": "MemberAccess",
+                      "src": "1023:14:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "1019:18:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "id": 81,
+                  "initializationExpression": {
+                    "assignments": [
+                      62
+                    ],
+                    "declarations": [
+                      {
+                        "constant": false,
+                        "id": 62,
+                        "mutability": "mutable",
+                        "name": "i",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 81,
+                        "src": "1004:9:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        },
+                        "typeName": {
+                          "id": 61,
+                          "name": "uint256",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1004:7:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "id": 64,
+                    "initialValue": {
+                      "hexValue": "30",
+                      "id": 63,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "1016:1:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "nodeType": "VariableDeclarationStatement",
+                    "src": "1004:13:0"
+                  },
+                  "loopExpression": {
+                    "expression": {
+                      "id": 70,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "nodeType": "UnaryOperation",
+                      "operator": "++",
+                      "prefix": false,
+                      "src": "1039:3:0",
+                      "subExpression": {
+                        "id": 69,
+                        "name": "i",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 62,
+                        "src": "1039:1:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 71,
+                    "nodeType": "ExpressionStatement",
+                    "src": "1039:3:0"
+                  },
+                  "nodeType": "ForStatement",
+                  "src": "999:98:0"
+                },
+                {
+                  "expression": {
+                    "id": 84,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 82,
+                      "name": "s_authorizedSenderList",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 11,
+                      "src": "1122:22:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_array$_t_address_$dyn_storage",
+                        "typeString": "address[] storage ref"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 83,
+                      "name": "senders",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 22,
+                      "src": "1147:7:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
+                        "typeString": "address[] calldata"
+                      }
+                    },
+                    "src": "1122:32:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage",
+                      "typeString": "address[] storage ref"
+                    }
+                  },
+                  "id": 85,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1122:32:0"
+                },
+                {
+                  "eventCall": {
+                    "arguments": [
+                      {
+                        "id": 87,
+                        "name": "senders",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 22,
+                        "src": "1190:7:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
+                          "typeString": "address[] calldata"
+                        }
+                      },
+                      {
+                        "expression": {
+                          "id": 88,
+                          "name": "msg",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 4294967281,
+                          "src": "1199:3:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_magic_message",
+                            "typeString": "msg"
+                          }
+                        },
+                        "id": 89,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "memberName": "sender",
+                        "nodeType": "MemberAccess",
+                        "src": "1199:10:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address_payable",
+                          "typeString": "address payable"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
+                          "typeString": "address[] calldata"
+                        },
+                        {
+                          "typeIdentifier": "t_address_payable",
+                          "typeString": "address payable"
+                        }
+                      ],
+                      "id": 86,
+                      "name": "AuthorizedSendersChanged",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 18,
+                      "src": "1165:24:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_array$_t_address_$dyn_memory_ptr_$_t_address_$returns$__$",
+                        "typeString": "function (address[] memory,address)"
+                      }
+                    },
+                    "id": 90,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "1165:45:0",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 91,
+                  "nodeType": "EmitStatement",
+                  "src": "1160:50:0"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 19,
+              "nodeType": "StructuredDocumentation",
+              "src": "359:181:0",
+              "text": " @notice Sets the fulfillment permission for a given node. Use `true` to allow, `false` to disallow.\n @param senders The addresses of the authorized Chainlink node"
+            },
+            "functionSelector": "ee56997b",
+            "id": 93,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [
+              {
+                "id": 26,
+                "modifierName": {
+                  "id": 25,
+                  "name": "validateAuthorizedSenderSetter",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 156,
+                  "src": "619:30:0",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_modifier$__$",
+                    "typeString": "modifier ()"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "619:30:0"
+              }
+            ],
+            "name": "setAuthorizedSenders",
+            "nodeType": "FunctionDefinition",
+            "overrides": {
+              "id": 24,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "610:8:0"
+            },
+            "parameters": {
+              "id": 23,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 22,
+                  "mutability": "mutable",
+                  "name": "senders",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 93,
+                  "src": "573:26:0",
+                  "stateVariable": false,
+                  "storageLocation": "calldata",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 20,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "573:7:0",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 21,
+                    "nodeType": "ArrayTypeName",
+                    "src": "573:9:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "572:28:0"
+            },
+            "returnParameters": {
+              "id": 27,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "650:0:0"
+            },
+            "scope": 157,
+            "src": "543:672:0",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "baseFunctions": [
+              432
+            ],
+            "body": {
+              "id": 103,
+              "nodeType": "Block",
+              "src": "1396:40:0",
+              "statements": [
+                {
+                  "expression": {
+                    "id": 101,
+                    "name": "s_authorizedSenderList",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 11,
+                    "src": "1409:22:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage",
+                      "typeString": "address[] storage ref"
+                    }
+                  },
+                  "functionReturnParameters": 100,
+                  "id": 102,
+                  "nodeType": "Return",
+                  "src": "1402:29:0"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 94,
+              "nodeType": "StructuredDocumentation",
+              "src": "1219:92:0",
+              "text": " @notice Retrieve a list of authorized senders\n @return array of addresses"
+            },
+            "functionSelector": "2408afaa",
+            "id": 104,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getAuthorizedSenders",
+            "nodeType": "FunctionDefinition",
+            "overrides": {
+              "id": 96,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "1360:8:0"
+            },
+            "parameters": {
+              "id": 95,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1343:2:0"
+            },
+            "returnParameters": {
+              "id": 100,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 99,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 104,
+                  "src": "1378:16:0",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 97,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1378:7:0",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 98,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1378:9:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1377:18:0"
+            },
+            "scope": 157,
+            "src": "1314:122:0",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "baseFunctions": [
+              426
+            ],
+            "body": {
+              "id": 117,
+              "nodeType": "Block",
+              "src": "1714:45:0",
+              "statements": [
+                {
+                  "expression": {
+                    "baseExpression": {
+                      "id": 113,
+                      "name": "s_authorizedSenders",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 8,
+                      "src": "1727:19:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+                        "typeString": "mapping(address => bool)"
+                      }
+                    },
+                    "id": 115,
+                    "indexExpression": {
+                      "id": 114,
+                      "name": "sender",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 107,
+                      "src": "1747:6:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "IndexAccess",
+                    "src": "1727:27:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "functionReturnParameters": 112,
+                  "id": 116,
+                  "nodeType": "Return",
+                  "src": "1720:34:0"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 105,
+              "nodeType": "StructuredDocumentation",
+              "src": "1440:191:0",
+              "text": " @notice Use this to check if a node is authorized for fulfilling requests\n @param sender The address of the Chainlink node\n @return The authorization status of the node"
+            },
+            "functionSelector": "fa00763a",
+            "id": 118,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isAuthorizedSender",
+            "nodeType": "FunctionDefinition",
+            "overrides": {
+              "id": 109,
+              "nodeType": "OverrideSpecifier",
+              "overrides": [],
+              "src": "1690:8:0"
+            },
+            "parameters": {
+              "id": 108,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 107,
+                  "mutability": "mutable",
+                  "name": "sender",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 118,
+                  "src": "1662:14:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 106,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1662:7:0",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1661:16:0"
+            },
+            "returnParameters": {
+              "id": 112,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 111,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 118,
+                  "src": "1708:4:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 110,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1708:4:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1707:6:0"
+            },
+            "scope": 157,
+            "src": "1634:125:0",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "public"
+          },
+          {
+            "documentation": {
+              "id": 119,
+              "nodeType": "StructuredDocumentation",
+              "src": "1763:153:0",
+              "text": " @notice customizable guard of who can update the authorized sender list\n @return bool whether sender can update authorized sender list"
+            },
+            "id": 124,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_canSetAuthorizedSenders",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 120,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1952:2:0"
+            },
+            "returnParameters": {
+              "id": 123,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 122,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 124,
+                  "src": "1981:4:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 121,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1981:4:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1980:6:0"
+            },
+            "scope": 157,
+            "src": "1919:68:0",
+            "stateMutability": "nonpayable",
+            "virtual": true,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 136,
+              "nodeType": "Block",
+              "src": "2114:75:0",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "expression": {
+                              "id": 130,
+                              "name": "msg",
+                              "nodeType": "Identifier",
+                              "overloadedDeclarations": [],
+                              "referencedDeclaration": 4294967281,
+                              "src": "2147:3:0",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_magic_message",
+                                "typeString": "msg"
+                              }
+                            },
+                            "id": 131,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberName": "sender",
+                            "nodeType": "MemberAccess",
+                            "src": "2147:10:0",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_address_payable",
+                              "typeString": "address payable"
+                            }
+                          }
+                        ],
+                        "expression": {
+                          "argumentTypes": [
+                            {
+                              "typeIdentifier": "t_address_payable",
+                              "typeString": "address payable"
+                            }
+                          ],
+                          "id": 129,
+                          "name": "isAuthorizedSender",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 118,
+                          "src": "2128:18:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_view$_t_address_$returns$_t_bool_$",
+                            "typeString": "function (address) view returns (bool)"
+                          }
+                        },
+                        "id": 132,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "2128:30:0",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "4e6f7420617574686f72697a65642073656e646572",
+                        "id": 133,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2160:23:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_5a083387ecb7b35969f9f76010e624fda62be11b67525540d766bdf778de001f",
+                          "typeString": "literal_string \"Not authorized sender\""
+                        },
+                        "value": "Not authorized sender"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_5a083387ecb7b35969f9f76010e624fda62be11b67525540d766bdf778de001f",
+                          "typeString": "literal_string \"Not authorized sender\""
+                        }
+                      ],
+                      "id": 128,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "2120:7:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 134,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2120:64:0",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 135,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2120:64:0"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 125,
+              "nodeType": "StructuredDocumentation",
+              "src": "1991:67:0",
+              "text": " @notice validates the sender is an authorized sender"
+            },
+            "id": 137,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_validateIsAuthorizedSender",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 126,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2097:2:0"
+            },
+            "returnParameters": {
+              "id": 127,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2114:0:0"
+            },
+            "scope": 157,
+            "src": "2061:128:0",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 144,
+              "nodeType": "Block",
+              "src": "2313:47:0",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "id": 140,
+                      "name": "_validateIsAuthorizedSender",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 137,
+                      "src": "2319:27:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_view$__$returns$__$",
+                        "typeString": "function () view"
+                      }
+                    },
+                    "id": 141,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2319:29:0",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 142,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2319:29:0"
+                },
+                {
+                  "id": 143,
+                  "nodeType": "PlaceholderStatement",
+                  "src": "2354:1:0"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 138,
+              "nodeType": "StructuredDocumentation",
+              "src": "2193:81:0",
+              "text": " @notice prevents non-authorized addresses from calling this method"
+            },
+            "id": 145,
+            "name": "validateAuthorizedSender",
+            "nodeType": "ModifierDefinition",
+            "parameters": {
+              "id": 139,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2310:2:0"
+            },
+            "src": "2277:83:0",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 155,
+              "nodeType": "Block",
+              "src": "2490:86:0",
+              "statements": [
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [],
+                        "expression": {
+                          "argumentTypes": [],
+                          "id": 149,
+                          "name": "_canSetAuthorizedSenders",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 124,
+                          "src": "2504:24:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_function_internal_nonpayable$__$returns$_t_bool_$",
+                            "typeString": "function () returns (bool)"
+                          }
+                        },
+                        "id": 150,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "kind": "functionCall",
+                        "lValueRequested": false,
+                        "names": [],
+                        "nodeType": "FunctionCall",
+                        "src": "2504:26:0",
+                        "tryCall": false,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      },
+                      {
+                        "hexValue": "43616e6e6f742073657420617574686f72697a65642073656e64657273",
+                        "id": 151,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "2532:31:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_337562cc5e507e68e993a2940bfc6a29858c6f26ee0c10db449328584e3eb567",
+                          "typeString": "literal_string \"Cannot set authorized senders\""
+                        },
+                        "value": "Cannot set authorized senders"
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_337562cc5e507e68e993a2940bfc6a29858c6f26ee0c10db449328584e3eb567",
+                          "typeString": "literal_string \"Cannot set authorized senders\""
+                        }
+                      ],
+                      "id": 148,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        4294967278,
+                        4294967278
+                      ],
+                      "referencedDeclaration": 4294967278,
+                      "src": "2496:7:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (bool,string memory) pure"
+                      }
+                    },
+                    "id": 152,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "2496:68:0",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 153,
+                  "nodeType": "ExpressionStatement",
+                  "src": "2496:68:0"
+                },
+                {
+                  "id": 154,
+                  "nodeType": "PlaceholderStatement",
+                  "src": "2570:1:0"
+                }
+              ]
+            },
+            "documentation": {
+              "id": 146,
+              "nodeType": "StructuredDocumentation",
+              "src": "2364:81:0",
+              "text": " @notice prevents non-authorized addresses from calling this method"
+            },
+            "id": 156,
+            "name": "validateAuthorizedSenderSetter",
+            "nodeType": "ModifierDefinition",
+            "parameters": {
+              "id": 147,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2487:2:0"
+            },
+            "src": "2448:128:0",
+            "virtual": false,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 158,
+        "src": "113:2465:0"
+      }
+    ],
+    "src": "32:2547:0"
+  },
+  "legacyAST": {
+    "attributes": {
+      "absolutePath": "@chainlink/contracts/src/v0.7/AuthorizedReceiver.sol",
+      "exportedSymbols": {
+        "AuthorizedReceiver": [
+          157
+        ],
+        "AuthorizedReceiverInterface": [
+          439
+        ]
+      },
+      "license": "MIT"
+    },
+    "children": [
+      {
+        "attributes": {
+          "literals": [
+            "solidity",
+            "^",
+            "0.7",
+            ".0"
+          ]
+        },
+        "id": 1,
+        "name": "PragmaDirective",
+        "src": "32:23:0"
+      },
+      {
+        "attributes": {
+          "SourceUnit": 440,
+          "absolutePath": "@chainlink/contracts/src/v0.7/interfaces/AuthorizedReceiverInterface.sol",
+          "file": "./interfaces/AuthorizedReceiverInterface.sol",
+          "scope": 158,
+          "symbolAliases": [
+            null
+          ],
+          "unitAlias": ""
+        },
+        "id": 2,
+        "name": "ImportDirective",
+        "src": "57:54:0"
+      },
+      {
+        "attributes": {
+          "abstract": true,
+          "contractDependencies": [
+            439
+          ],
+          "contractKind": "contract",
+          "fullyImplemented": false,
+          "linearizedBaseContracts": [
+            157,
+            439
+          ],
+          "name": "AuthorizedReceiver",
+          "scope": 158
+        },
+        "children": [
+          {
+            "attributes": {},
+            "children": [
+              {
+                "attributes": {
+                  "name": "AuthorizedReceiverInterface",
+                  "referencedDeclaration": 439,
+                  "type": "contract AuthorizedReceiverInterface"
+                },
+                "id": 3,
+                "name": "UserDefinedTypeName",
+                "src": "153:27:0"
+              }
+            ],
+            "id": 4,
+            "name": "InheritanceSpecifier",
+            "src": "153:27:0"
+          },
+          {
+            "attributes": {
+              "constant": false,
+              "mutability": "mutable",
+              "name": "s_authorizedSenders",
+              "scope": 157,
+              "stateVariable": true,
+              "storageLocation": "default",
+              "type": "mapping(address => bool)",
+              "visibility": "private"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "type": "mapping(address => bool)"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "address",
+                      "type": "address"
+                    },
+                    "id": 5,
+                    "name": "ElementaryTypeName",
+                    "src": "193:7:0"
+                  },
+                  {
+                    "attributes": {
+                      "name": "bool",
+                      "type": "bool"
+                    },
+                    "id": 6,
+                    "name": "ElementaryTypeName",
+                    "src": "204:4:0"
+                  }
+                ],
+                "id": 7,
+                "name": "Mapping",
+                "src": "185:24:0"
+              }
+            ],
+            "id": 8,
+            "name": "VariableDeclaration",
+            "src": "185:52:0"
+          },
+          {
+            "attributes": {
+              "constant": false,
+              "mutability": "mutable",
+              "name": "s_authorizedSenderList",
+              "scope": 157,
+              "stateVariable": true,
+              "storageLocation": "default",
+              "type": "address[]",
+              "visibility": "private"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "type": "address[]"
+                },
+                "children": [
+                  {
+                    "attributes": {
+                      "name": "address",
+                      "stateMutability": "nonpayable",
+                      "type": "address"
+                    },
+                    "id": 9,
+                    "name": "ElementaryTypeName",
+                    "src": "241:7:0"
+                  }
+                ],
+                "id": 10,
+                "name": "ArrayTypeName",
+                "src": "241:9:0"
+              }
+            ],
+            "id": 11,
+            "name": "VariableDeclaration",
+            "src": "241:40:0"
+          },
+          {
+            "attributes": {
+              "anonymous": false,
+              "name": "AuthorizedSendersChanged"
+            },
+            "children": [
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "indexed": false,
+                      "mutability": "mutable",
+                      "name": "senders",
+                      "scope": 18,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address[]",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "type": "address[]"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "name": "address",
+                              "stateMutability": "nonpayable",
+                              "type": "address"
+                            },
+                            "id": 12,
+                            "name": "ElementaryTypeName",
+                            "src": "317:7:0"
+                          }
+                        ],
+                        "id": 13,
+                        "name": "ArrayTypeName",
+                        "src": "317:9:0"
+                      }
+                    ],
+                    "id": 14,
+                    "name": "VariableDeclaration",
+                    "src": "317:17:0"
+                  },
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "indexed": false,
+                      "mutability": "mutable",
+                      "name": "changedBy",
+                      "scope": 18,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 15,
+                        "name": "ElementaryTypeName",
+                        "src": "336:7:0"
+                      }
+                    ],
+                    "id": 16,
+                    "name": "VariableDeclaration",
+                    "src": "336:17:0"
+                  }
+                ],
+                "id": 17,
+                "name": "ParameterList",
+                "src": "316:38:0"
+              }
+            ],
+            "id": 18,
+            "name": "EventDefinition",
+            "src": "286:69:0"
+          },
+          {
+            "attributes": {
+              "baseFunctions": [
+                438
+              ],
+              "functionSelector": "ee56997b",
+              "implemented": true,
+              "isConstructor": false,
+              "kind": "function",
+              "name": "setAuthorizedSenders",
+              "scope": 157,
+              "stateMutability": "nonpayable",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "text": " @notice Sets the fulfillment permission for a given node. Use `true` to allow, `false` to disallow.\n @param senders The addresses of the authorized Chainlink node"
+                },
+                "id": 19,
+                "name": "StructuredDocumentation",
+                "src": "359:181:0"
+              },
+              {
+                "attributes": {
+                  "overrides": [
+                    null
+                  ]
+                },
+                "id": 24,
+                "name": "OverrideSpecifier",
+                "src": "610:8:0"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "senders",
+                      "scope": 93,
+                      "stateVariable": false,
+                      "storageLocation": "calldata",
+                      "type": "address[]",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "type": "address[]"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "name": "address",
+                              "stateMutability": "nonpayable",
+                              "type": "address"
+                            },
+                            "id": 20,
+                            "name": "ElementaryTypeName",
+                            "src": "573:7:0"
+                          }
+                        ],
+                        "id": 21,
+                        "name": "ArrayTypeName",
+                        "src": "573:9:0"
+                      }
+                    ],
+                    "id": 22,
+                    "name": "VariableDeclaration",
+                    "src": "573:26:0"
+                  }
+                ],
+                "id": 23,
+                "name": "ParameterList",
+                "src": "572:28:0"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 27,
+                "name": "ParameterList",
+                "src": "650:0:0"
+              },
+              {
+                "attributes": {},
+                "children": [
+                  {
+                    "attributes": {
+                      "overloadedDeclarations": [
+                        null
+                      ],
+                      "referencedDeclaration": 156,
+                      "type": "modifier ()",
+                      "value": "validateAuthorizedSenderSetter"
+                    },
+                    "id": 25,
+                    "name": "Identifier",
+                    "src": "619:30:0"
+                  }
+                ],
+                "id": 26,
+                "name": "ModifierInvocation",
+                "src": "619:30:0"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "tryCall": false,
+                          "type": "tuple()",
+                          "type_conversion": false
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_bool",
+                                  "typeString": "bool"
+                                },
+                                {
+                                  "typeIdentifier": "t_stringliteral_14acbd13c311ce77adbf2abb2c29118807e2efa37eb8080b0a33366f8bd4c4af",
+                                  "typeString": "literal_string \"Must have at least 1 authorized sender\""
+                                }
+                              ],
+                              "overloadedDeclarations": [
+                                4294967278,
+                                4294967278
+                              ],
+                              "referencedDeclaration": 4294967278,
+                              "type": "function (bool,string memory) pure",
+                              "value": "require"
+                            },
+                            "id": 28,
+                            "name": "Identifier",
+                            "src": "656:7:0"
+                          },
+                          {
+                            "attributes": {
+                              "commonType": {
+                                "typeIdentifier": "t_uint256",
+                                "typeString": "uint256"
+                              },
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "operator": ">",
+                              "type": "bool"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "member_name": "length",
+                                  "type": "uint256"
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "overloadedDeclarations": [
+                                        null
+                                      ],
+                                      "referencedDeclaration": 22,
+                                      "type": "address[] calldata",
+                                      "value": "senders"
+                                    },
+                                    "id": 29,
+                                    "name": "Identifier",
+                                    "src": "664:7:0"
+                                  }
+                                ],
+                                "id": 30,
+                                "name": "MemberAccess",
+                                "src": "664:14:0"
+                              },
+                              {
+                                "attributes": {
+                                  "hexvalue": "30",
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "lValueRequested": false,
+                                  "token": "number",
+                                  "type": "int_const 0",
+                                  "value": "0"
+                                },
+                                "id": 31,
+                                "name": "Literal",
+                                "src": "681:1:0"
+                              }
+                            ],
+                            "id": 32,
+                            "name": "BinaryOperation",
+                            "src": "664:18:0"
+                          },
+                          {
+                            "attributes": {
+                              "hexvalue": "4d7573742068617665206174206c65617374203120617574686f72697a65642073656e646572",
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "token": "string",
+                              "type": "literal_string \"Must have at least 1 authorized sender\"",
+                              "value": "Must have at least 1 authorized sender"
+                            },
+                            "id": 33,
+                            "name": "Literal",
+                            "src": "684:40:0"
+                          }
+                        ],
+                        "id": 34,
+                        "name": "FunctionCall",
+                        "src": "656:69:0"
+                      }
+                    ],
+                    "id": 35,
+                    "name": "ExpressionStatement",
+                    "src": "656:69:0"
+                  },
+                  {
+                    "attributes": {
+                      "assignments": [
+                        37
+                      ]
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "constant": false,
+                          "mutability": "mutable",
+                          "name": "authorizedSendersLength",
+                          "scope": 92,
+                          "stateVariable": false,
+                          "storageLocation": "default",
+                          "type": "uint256",
+                          "visibility": "internal"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "name": "uint256",
+                              "type": "uint256"
+                            },
+                            "id": 36,
+                            "name": "ElementaryTypeName",
+                            "src": "779:7:0"
+                          }
+                        ],
+                        "id": 37,
+                        "name": "VariableDeclaration",
+                        "src": "779:31:0"
+                      },
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "member_name": "length",
+                          "type": "uint256"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 11,
+                              "type": "address[] storage ref",
+                              "value": "s_authorizedSenderList"
+                            },
+                            "id": 38,
+                            "name": "Identifier",
+                            "src": "813:22:0"
+                          }
+                        ],
+                        "id": 39,
+                        "name": "MemberAccess",
+                        "src": "813:29:0"
+                      }
+                    ],
+                    "id": 40,
+                    "name": "VariableDeclarationStatement",
+                    "src": "779:63:0"
+                  },
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "assignments": [
+                            42
+                          ]
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "constant": false,
+                              "mutability": "mutable",
+                              "name": "i",
+                              "scope": 60,
+                              "stateVariable": false,
+                              "storageLocation": "default",
+                              "type": "uint256",
+                              "visibility": "internal"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "name": "uint256",
+                                  "type": "uint256"
+                                },
+                                "id": 41,
+                                "name": "ElementaryTypeName",
+                                "src": "853:7:0"
+                              }
+                            ],
+                            "id": 42,
+                            "name": "VariableDeclaration",
+                            "src": "853:9:0"
+                          },
+                          {
+                            "attributes": {
+                              "hexvalue": "30",
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "token": "number",
+                              "type": "int_const 0",
+                              "value": "0"
+                            },
+                            "id": 43,
+                            "name": "Literal",
+                            "src": "865:1:0"
+                          }
+                        ],
+                        "id": 44,
+                        "name": "VariableDeclarationStatement",
+                        "src": "853:13:0"
+                      },
+                      {
+                        "attributes": {
+                          "commonType": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          },
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "operator": "<",
+                          "type": "bool"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 42,
+                              "type": "uint256",
+                              "value": "i"
+                            },
+                            "id": 45,
+                            "name": "Identifier",
+                            "src": "868:1:0"
+                          },
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 37,
+                              "type": "uint256",
+                              "value": "authorizedSendersLength"
+                            },
+                            "id": 46,
+                            "name": "Identifier",
+                            "src": "872:23:0"
+                          }
+                        ],
+                        "id": 47,
+                        "name": "BinaryOperation",
+                        "src": "868:27:0"
+                      },
+                      {
+                        "children": [
+                          {
+                            "attributes": {
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "operator": "++",
+                              "prefix": false,
+                              "type": "uint256"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 42,
+                                  "type": "uint256",
+                                  "value": "i"
+                                },
+                                "id": 48,
+                                "name": "Identifier",
+                                "src": "897:1:0"
+                              }
+                            ],
+                            "id": 49,
+                            "name": "UnaryOperation",
+                            "src": "897:3:0"
+                          }
+                        ],
+                        "id": 50,
+                        "name": "ExpressionStatement",
+                        "src": "897:3:0"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "attributes": {
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "operator": "=",
+                                  "type": "bool"
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "isConstant": false,
+                                      "isLValue": true,
+                                      "isPure": false,
+                                      "lValueRequested": true,
+                                      "type": "bool"
+                                    },
+                                    "children": [
+                                      {
+                                        "attributes": {
+                                          "overloadedDeclarations": [
+                                            null
+                                          ],
+                                          "referencedDeclaration": 8,
+                                          "type": "mapping(address => bool)",
+                                          "value": "s_authorizedSenders"
+                                        },
+                                        "id": 51,
+                                        "name": "Identifier",
+                                        "src": "910:19:0"
+                                      },
+                                      {
+                                        "attributes": {
+                                          "isConstant": false,
+                                          "isLValue": true,
+                                          "isPure": false,
+                                          "lValueRequested": false,
+                                          "type": "address"
+                                        },
+                                        "children": [
+                                          {
+                                            "attributes": {
+                                              "overloadedDeclarations": [
+                                                null
+                                              ],
+                                              "referencedDeclaration": 11,
+                                              "type": "address[] storage ref",
+                                              "value": "s_authorizedSenderList"
+                                            },
+                                            "id": 52,
+                                            "name": "Identifier",
+                                            "src": "930:22:0"
+                                          },
+                                          {
+                                            "attributes": {
+                                              "overloadedDeclarations": [
+                                                null
+                                              ],
+                                              "referencedDeclaration": 42,
+                                              "type": "uint256",
+                                              "value": "i"
+                                            },
+                                            "id": 53,
+                                            "name": "Identifier",
+                                            "src": "953:1:0"
+                                          }
+                                        ],
+                                        "id": 54,
+                                        "name": "IndexAccess",
+                                        "src": "930:25:0"
+                                      }
+                                    ],
+                                    "id": 55,
+                                    "name": "IndexAccess",
+                                    "src": "910:46:0"
+                                  },
+                                  {
+                                    "attributes": {
+                                      "hexvalue": "66616c7365",
+                                      "isConstant": false,
+                                      "isLValue": false,
+                                      "isPure": true,
+                                      "lValueRequested": false,
+                                      "token": "bool",
+                                      "type": "bool",
+                                      "value": "false"
+                                    },
+                                    "id": 56,
+                                    "name": "Literal",
+                                    "src": "959:5:0"
+                                  }
+                                ],
+                                "id": 57,
+                                "name": "Assignment",
+                                "src": "910:54:0"
+                              }
+                            ],
+                            "id": 58,
+                            "name": "ExpressionStatement",
+                            "src": "910:54:0"
+                          }
+                        ],
+                        "id": 59,
+                        "name": "Block",
+                        "src": "902:69:0"
+                      }
+                    ],
+                    "id": 60,
+                    "name": "ForStatement",
+                    "src": "848:123:0"
+                  },
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "assignments": [
+                            62
+                          ]
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "constant": false,
+                              "mutability": "mutable",
+                              "name": "i",
+                              "scope": 81,
+                              "stateVariable": false,
+                              "storageLocation": "default",
+                              "type": "uint256",
+                              "visibility": "internal"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "name": "uint256",
+                                  "type": "uint256"
+                                },
+                                "id": 61,
+                                "name": "ElementaryTypeName",
+                                "src": "1004:7:0"
+                              }
+                            ],
+                            "id": 62,
+                            "name": "VariableDeclaration",
+                            "src": "1004:9:0"
+                          },
+                          {
+                            "attributes": {
+                              "hexvalue": "30",
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "token": "number",
+                              "type": "int_const 0",
+                              "value": "0"
+                            },
+                            "id": 63,
+                            "name": "Literal",
+                            "src": "1016:1:0"
+                          }
+                        ],
+                        "id": 64,
+                        "name": "VariableDeclarationStatement",
+                        "src": "1004:13:0"
+                      },
+                      {
+                        "attributes": {
+                          "commonType": {
+                            "typeIdentifier": "t_uint256",
+                            "typeString": "uint256"
+                          },
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "operator": "<",
+                          "type": "bool"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 62,
+                              "type": "uint256",
+                              "value": "i"
+                            },
+                            "id": 65,
+                            "name": "Identifier",
+                            "src": "1019:1:0"
+                          },
+                          {
+                            "attributes": {
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "member_name": "length",
+                              "type": "uint256"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 22,
+                                  "type": "address[] calldata",
+                                  "value": "senders"
+                                },
+                                "id": 66,
+                                "name": "Identifier",
+                                "src": "1023:7:0"
+                              }
+                            ],
+                            "id": 67,
+                            "name": "MemberAccess",
+                            "src": "1023:14:0"
+                          }
+                        ],
+                        "id": 68,
+                        "name": "BinaryOperation",
+                        "src": "1019:18:0"
+                      },
+                      {
+                        "children": [
+                          {
+                            "attributes": {
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "operator": "++",
+                              "prefix": false,
+                              "type": "uint256"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 62,
+                                  "type": "uint256",
+                                  "value": "i"
+                                },
+                                "id": 69,
+                                "name": "Identifier",
+                                "src": "1039:1:0"
+                              }
+                            ],
+                            "id": 70,
+                            "name": "UnaryOperation",
+                            "src": "1039:3:0"
+                          }
+                        ],
+                        "id": 71,
+                        "name": "ExpressionStatement",
+                        "src": "1039:3:0"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "attributes": {
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "operator": "=",
+                                  "type": "bool"
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "isConstant": false,
+                                      "isLValue": true,
+                                      "isPure": false,
+                                      "lValueRequested": true,
+                                      "type": "bool"
+                                    },
+                                    "children": [
+                                      {
+                                        "attributes": {
+                                          "overloadedDeclarations": [
+                                            null
+                                          ],
+                                          "referencedDeclaration": 8,
+                                          "type": "mapping(address => bool)",
+                                          "value": "s_authorizedSenders"
+                                        },
+                                        "id": 72,
+                                        "name": "Identifier",
+                                        "src": "1052:19:0"
+                                      },
+                                      {
+                                        "attributes": {
+                                          "isConstant": false,
+                                          "isLValue": false,
+                                          "isPure": false,
+                                          "lValueRequested": false,
+                                          "type": "address"
+                                        },
+                                        "children": [
+                                          {
+                                            "attributes": {
+                                              "overloadedDeclarations": [
+                                                null
+                                              ],
+                                              "referencedDeclaration": 22,
+                                              "type": "address[] calldata",
+                                              "value": "senders"
+                                            },
+                                            "id": 73,
+                                            "name": "Identifier",
+                                            "src": "1072:7:0"
+                                          },
+                                          {
+                                            "attributes": {
+                                              "overloadedDeclarations": [
+                                                null
+                                              ],
+                                              "referencedDeclaration": 62,
+                                              "type": "uint256",
+                                              "value": "i"
+                                            },
+                                            "id": 74,
+                                            "name": "Identifier",
+                                            "src": "1080:1:0"
+                                          }
+                                        ],
+                                        "id": 75,
+                                        "name": "IndexAccess",
+                                        "src": "1072:10:0"
+                                      }
+                                    ],
+                                    "id": 76,
+                                    "name": "IndexAccess",
+                                    "src": "1052:31:0"
+                                  },
+                                  {
+                                    "attributes": {
+                                      "hexvalue": "74727565",
+                                      "isConstant": false,
+                                      "isLValue": false,
+                                      "isPure": true,
+                                      "lValueRequested": false,
+                                      "token": "bool",
+                                      "type": "bool",
+                                      "value": "true"
+                                    },
+                                    "id": 77,
+                                    "name": "Literal",
+                                    "src": "1086:4:0"
+                                  }
+                                ],
+                                "id": 78,
+                                "name": "Assignment",
+                                "src": "1052:38:0"
+                              }
+                            ],
+                            "id": 79,
+                            "name": "ExpressionStatement",
+                            "src": "1052:38:0"
+                          }
+                        ],
+                        "id": 80,
+                        "name": "Block",
+                        "src": "1044:53:0"
+                      }
+                    ],
+                    "id": 81,
+                    "name": "ForStatement",
+                    "src": "999:98:0"
+                  },
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "operator": "=",
+                          "type": "address[] storage ref"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 11,
+                              "type": "address[] storage ref",
+                              "value": "s_authorizedSenderList"
+                            },
+                            "id": 82,
+                            "name": "Identifier",
+                            "src": "1122:22:0"
+                          },
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 22,
+                              "type": "address[] calldata",
+                              "value": "senders"
+                            },
+                            "id": 83,
+                            "name": "Identifier",
+                            "src": "1147:7:0"
+                          }
+                        ],
+                        "id": 84,
+                        "name": "Assignment",
+                        "src": "1122:32:0"
+                      }
+                    ],
+                    "id": 85,
+                    "name": "ExpressionStatement",
+                    "src": "1122:32:0"
+                  },
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "tryCall": false,
+                          "type": "tuple()",
+                          "type_conversion": false
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_array$_t_address_$dyn_calldata_ptr",
+                                  "typeString": "address[] calldata"
+                                },
+                                {
+                                  "typeIdentifier": "t_address_payable",
+                                  "typeString": "address payable"
+                                }
+                              ],
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 18,
+                              "type": "function (address[] memory,address)",
+                              "value": "AuthorizedSendersChanged"
+                            },
+                            "id": 86,
+                            "name": "Identifier",
+                            "src": "1165:24:0"
+                          },
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 22,
+                              "type": "address[] calldata",
+                              "value": "senders"
+                            },
+                            "id": 87,
+                            "name": "Identifier",
+                            "src": "1190:7:0"
+                          },
+                          {
+                            "attributes": {
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "lValueRequested": false,
+                              "member_name": "sender",
+                              "type": "address payable"
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 4294967281,
+                                  "type": "msg",
+                                  "value": "msg"
+                                },
+                                "id": 88,
+                                "name": "Identifier",
+                                "src": "1199:3:0"
+                              }
+                            ],
+                            "id": 89,
+                            "name": "MemberAccess",
+                            "src": "1199:10:0"
+                          }
+                        ],
+                        "id": 90,
+                        "name": "FunctionCall",
+                        "src": "1165:45:0"
+                      }
+                    ],
+                    "id": 91,
+                    "name": "EmitStatement",
+                    "src": "1160:50:0"
+                  }
+                ],
+                "id": 92,
+                "name": "Block",
+                "src": "650:565:0"
+              }
+            ],
+            "id": 93,
+            "name": "FunctionDefinition",
+            "src": "543:672:0"
+          },
+          {
+            "attributes": {
+              "baseFunctions": [
+                432
+              ],
+              "functionSelector": "2408afaa",
+              "implemented": true,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "getAuthorizedSenders",
+              "scope": 157,
+              "stateMutability": "view",
+              "virtual": false,
+              "visibility": "external"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "text": " @notice Retrieve a list of authorized senders\n @return array of addresses"
+                },
+                "id": 94,
+                "name": "StructuredDocumentation",
+                "src": "1219:92:0"
+              },
+              {
+                "attributes": {
+                  "overrides": [
+                    null
+                  ]
+                },
+                "id": 96,
+                "name": "OverrideSpecifier",
+                "src": "1360:8:0"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 95,
+                "name": "ParameterList",
+                "src": "1343:2:0"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "scope": 104,
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "type": "address[]",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "type": "address[]"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "name": "address",
+                              "stateMutability": "nonpayable",
+                              "type": "address"
+                            },
+                            "id": 97,
+                            "name": "ElementaryTypeName",
+                            "src": "1378:7:0"
+                          }
+                        ],
+                        "id": 98,
+                        "name": "ArrayTypeName",
+                        "src": "1378:9:0"
+                      }
+                    ],
+                    "id": 99,
+                    "name": "VariableDeclaration",
+                    "src": "1378:16:0"
+                  }
+                ],
+                "id": 100,
+                "name": "ParameterList",
+                "src": "1377:18:0"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "functionReturnParameters": 100
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "overloadedDeclarations": [
+                            null
+                          ],
+                          "referencedDeclaration": 11,
+                          "type": "address[] storage ref",
+                          "value": "s_authorizedSenderList"
+                        },
+                        "id": 101,
+                        "name": "Identifier",
+                        "src": "1409:22:0"
+                      }
+                    ],
+                    "id": 102,
+                    "name": "Return",
+                    "src": "1402:29:0"
+                  }
+                ],
+                "id": 103,
+                "name": "Block",
+                "src": "1396:40:0"
+              }
+            ],
+            "id": 104,
+            "name": "FunctionDefinition",
+            "src": "1314:122:0"
+          },
+          {
+            "attributes": {
+              "baseFunctions": [
+                426
+              ],
+              "functionSelector": "fa00763a",
+              "implemented": true,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "isAuthorizedSender",
+              "scope": 157,
+              "stateMutability": "view",
+              "virtual": false,
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "text": " @notice Use this to check if a node is authorized for fulfilling requests\n @param sender The address of the Chainlink node\n @return The authorization status of the node"
+                },
+                "id": 105,
+                "name": "StructuredDocumentation",
+                "src": "1440:191:0"
+              },
+              {
+                "attributes": {
+                  "overrides": [
+                    null
+                  ]
+                },
+                "id": 109,
+                "name": "OverrideSpecifier",
+                "src": "1690:8:0"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "sender",
+                      "scope": 118,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "address",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "address",
+                          "stateMutability": "nonpayable",
+                          "type": "address"
+                        },
+                        "id": 106,
+                        "name": "ElementaryTypeName",
+                        "src": "1662:7:0"
+                      }
+                    ],
+                    "id": 107,
+                    "name": "VariableDeclaration",
+                    "src": "1662:14:0"
+                  }
+                ],
+                "id": 108,
+                "name": "ParameterList",
+                "src": "1661:16:0"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "scope": 118,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "bool",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "bool",
+                          "type": "bool"
+                        },
+                        "id": 110,
+                        "name": "ElementaryTypeName",
+                        "src": "1708:4:0"
+                      }
+                    ],
+                    "id": 111,
+                    "name": "VariableDeclaration",
+                    "src": "1708:4:0"
+                  }
+                ],
+                "id": 112,
+                "name": "ParameterList",
+                "src": "1707:6:0"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "functionReturnParameters": 112
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "type": "bool"
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 8,
+                              "type": "mapping(address => bool)",
+                              "value": "s_authorizedSenders"
+                            },
+                            "id": 113,
+                            "name": "Identifier",
+                            "src": "1727:19:0"
+                          },
+                          {
+                            "attributes": {
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 107,
+                              "type": "address",
+                              "value": "sender"
+                            },
+                            "id": 114,
+                            "name": "Identifier",
+                            "src": "1747:6:0"
+                          }
+                        ],
+                        "id": 115,
+                        "name": "IndexAccess",
+                        "src": "1727:27:0"
+                      }
+                    ],
+                    "id": 116,
+                    "name": "Return",
+                    "src": "1720:34:0"
+                  }
+                ],
+                "id": 117,
+                "name": "Block",
+                "src": "1714:45:0"
+              }
+            ],
+            "id": 118,
+            "name": "FunctionDefinition",
+            "src": "1634:125:0"
+          },
+          {
+            "attributes": {
+              "implemented": false,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "_canSetAuthorizedSenders",
+              "scope": 157,
+              "stateMutability": "nonpayable",
+              "virtual": true,
+              "visibility": "internal"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "text": " @notice customizable guard of who can update the authorized sender list\n @return bool whether sender can update authorized sender list"
+                },
+                "id": 119,
+                "name": "StructuredDocumentation",
+                "src": "1763:153:0"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 120,
+                "name": "ParameterList",
+                "src": "1952:2:0"
+              },
+              {
+                "children": [
+                  {
+                    "attributes": {
+                      "constant": false,
+                      "mutability": "mutable",
+                      "name": "",
+                      "scope": 124,
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "type": "bool",
+                      "visibility": "internal"
+                    },
+                    "children": [
+                      {
+                        "attributes": {
+                          "name": "bool",
+                          "type": "bool"
+                        },
+                        "id": 121,
+                        "name": "ElementaryTypeName",
+                        "src": "1981:4:0"
+                      }
+                    ],
+                    "id": 122,
+                    "name": "VariableDeclaration",
+                    "src": "1981:4:0"
+                  }
+                ],
+                "id": 123,
+                "name": "ParameterList",
+                "src": "1980:6:0"
+              }
+            ],
+            "id": 124,
+            "name": "FunctionDefinition",
+            "src": "1919:68:0"
+          },
+          {
+            "attributes": {
+              "implemented": true,
+              "isConstructor": false,
+              "kind": "function",
+              "modifiers": [
+                null
+              ],
+              "name": "_validateIsAuthorizedSender",
+              "scope": 157,
+              "stateMutability": "view",
+              "virtual": false,
+              "visibility": "internal"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "text": " @notice validates the sender is an authorized sender"
+                },
+                "id": 125,
+                "name": "StructuredDocumentation",
+                "src": "1991:67:0"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 126,
+                "name": "ParameterList",
+                "src": "2097:2:0"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 127,
+                "name": "ParameterList",
+                "src": "2114:0:0"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "tryCall": false,
+                          "type": "tuple()",
+                          "type_conversion": false
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_bool",
+                                  "typeString": "bool"
+                                },
+                                {
+                                  "typeIdentifier": "t_stringliteral_5a083387ecb7b35969f9f76010e624fda62be11b67525540d766bdf778de001f",
+                                  "typeString": "literal_string \"Not authorized sender\""
+                                }
+                              ],
+                              "overloadedDeclarations": [
+                                4294967278,
+                                4294967278
+                              ],
+                              "referencedDeclaration": 4294967278,
+                              "type": "function (bool,string memory) pure",
+                              "value": "require"
+                            },
+                            "id": 128,
+                            "name": "Identifier",
+                            "src": "2120:7:0"
+                          },
+                          {
+                            "attributes": {
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "isStructConstructorCall": false,
+                              "lValueRequested": false,
+                              "names": [
+                                null
+                              ],
+                              "tryCall": false,
+                              "type": "bool",
+                              "type_conversion": false
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "argumentTypes": [
+                                    {
+                                      "typeIdentifier": "t_address_payable",
+                                      "typeString": "address payable"
+                                    }
+                                  ],
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 118,
+                                  "type": "function (address) view returns (bool)",
+                                  "value": "isAuthorizedSender"
+                                },
+                                "id": 129,
+                                "name": "Identifier",
+                                "src": "2128:18:0"
+                              },
+                              {
+                                "attributes": {
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "member_name": "sender",
+                                  "type": "address payable"
+                                },
+                                "children": [
+                                  {
+                                    "attributes": {
+                                      "overloadedDeclarations": [
+                                        null
+                                      ],
+                                      "referencedDeclaration": 4294967281,
+                                      "type": "msg",
+                                      "value": "msg"
+                                    },
+                                    "id": 130,
+                                    "name": "Identifier",
+                                    "src": "2147:3:0"
+                                  }
+                                ],
+                                "id": 131,
+                                "name": "MemberAccess",
+                                "src": "2147:10:0"
+                              }
+                            ],
+                            "id": 132,
+                            "name": "FunctionCall",
+                            "src": "2128:30:0"
+                          },
+                          {
+                            "attributes": {
+                              "hexvalue": "4e6f7420617574686f72697a65642073656e646572",
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "token": "string",
+                              "type": "literal_string \"Not authorized sender\"",
+                              "value": "Not authorized sender"
+                            },
+                            "id": 133,
+                            "name": "Literal",
+                            "src": "2160:23:0"
+                          }
+                        ],
+                        "id": 134,
+                        "name": "FunctionCall",
+                        "src": "2120:64:0"
+                      }
+                    ],
+                    "id": 135,
+                    "name": "ExpressionStatement",
+                    "src": "2120:64:0"
+                  }
+                ],
+                "id": 136,
+                "name": "Block",
+                "src": "2114:75:0"
+              }
+            ],
+            "id": 137,
+            "name": "FunctionDefinition",
+            "src": "2061:128:0"
+          },
+          {
+            "attributes": {
+              "name": "validateAuthorizedSender",
+              "virtual": false,
+              "visibility": "internal"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "text": " @notice prevents non-authorized addresses from calling this method"
+                },
+                "id": 138,
+                "name": "StructuredDocumentation",
+                "src": "2193:81:0"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 139,
+                "name": "ParameterList",
+                "src": "2310:2:0"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "arguments": [
+                            null
+                          ],
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "tryCall": false,
+                          "type": "tuple()",
+                          "type_conversion": false
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                null
+                              ],
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 137,
+                              "type": "function () view",
+                              "value": "_validateIsAuthorizedSender"
+                            },
+                            "id": 140,
+                            "name": "Identifier",
+                            "src": "2319:27:0"
+                          }
+                        ],
+                        "id": 141,
+                        "name": "FunctionCall",
+                        "src": "2319:29:0"
+                      }
+                    ],
+                    "id": 142,
+                    "name": "ExpressionStatement",
+                    "src": "2319:29:0"
+                  },
+                  {
+                    "id": 143,
+                    "name": "PlaceholderStatement",
+                    "src": "2354:1:0"
+                  }
+                ],
+                "id": 144,
+                "name": "Block",
+                "src": "2313:47:0"
+              }
+            ],
+            "id": 145,
+            "name": "ModifierDefinition",
+            "src": "2277:83:0"
+          },
+          {
+            "attributes": {
+              "name": "validateAuthorizedSenderSetter",
+              "virtual": false,
+              "visibility": "internal"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "text": " @notice prevents non-authorized addresses from calling this method"
+                },
+                "id": 146,
+                "name": "StructuredDocumentation",
+                "src": "2364:81:0"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 147,
+                "name": "ParameterList",
+                "src": "2487:2:0"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "tryCall": false,
+                          "type": "tuple()",
+                          "type_conversion": false
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                {
+                                  "typeIdentifier": "t_bool",
+                                  "typeString": "bool"
+                                },
+                                {
+                                  "typeIdentifier": "t_stringliteral_337562cc5e507e68e993a2940bfc6a29858c6f26ee0c10db449328584e3eb567",
+                                  "typeString": "literal_string \"Cannot set authorized senders\""
+                                }
+                              ],
+                              "overloadedDeclarations": [
+                                4294967278,
+                                4294967278
+                              ],
+                              "referencedDeclaration": 4294967278,
+                              "type": "function (bool,string memory) pure",
+                              "value": "require"
+                            },
+                            "id": 148,
+                            "name": "Identifier",
+                            "src": "2496:7:0"
+                          },
+                          {
+                            "attributes": {
+                              "arguments": [
+                                null
+                              ],
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "isStructConstructorCall": false,
+                              "lValueRequested": false,
+                              "names": [
+                                null
+                              ],
+                              "tryCall": false,
+                              "type": "bool",
+                              "type_conversion": false
+                            },
+                            "children": [
+                              {
+                                "attributes": {
+                                  "argumentTypes": [
+                                    null
+                                  ],
+                                  "overloadedDeclarations": [
+                                    null
+                                  ],
+                                  "referencedDeclaration": 124,
+                                  "type": "function () returns (bool)",
+                                  "value": "_canSetAuthorizedSenders"
+                                },
+                                "id": 149,
+                                "name": "Identifier",
+                                "src": "2504:24:0"
+                              }
+                            ],
+                            "id": 150,
+                            "name": "FunctionCall",
+                            "src": "2504:26:0"
+                          },
+                          {
+                            "attributes": {
+                              "hexvalue": "43616e6e6f742073657420617574686f72697a65642073656e64657273",
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "token": "string",
+                              "type": "literal_string \"Cannot set authorized senders\"",
+                              "value": "Cannot set authorized senders"
+                            },
+                            "id": 151,
+                            "name": "Literal",
+                            "src": "2532:31:0"
+                          }
+                        ],
+                        "id": 152,
+                        "name": "FunctionCall",
+                        "src": "2496:68:0"
+                      }
+                    ],
+                    "id": 153,
+                    "name": "ExpressionStatement",
+                    "src": "2496:68:0"
+                  },
+                  {
+                    "id": 154,
+                    "name": "PlaceholderStatement",
+                    "src": "2570:1:0"
+                  }
+                ],
+                "id": 155,
+                "name": "Block",
+                "src": "2490:86:0"
+              }
+            ],
+            "id": 156,
+            "name": "ModifierDefinition",
+            "src": "2448:128:0"
+          }
+        ],
+        "id": 157,
+        "name": "ContractDefinition",
+        "src": "113:2465:0"
+      }
+    ],
+    "id": 158,
+    "name": "SourceUnit",
+    "src": "32:2547:0"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.7.6+commit.7338295f.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.16",
+  "updatedAt": "2024-04-12T08:40:32.188Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "getAuthorizedSenders()": {
+        "returns": {
+          "_0": "array of addresses"
+        }
+      },
+      "isAuthorizedSender(address)": {
+        "params": {
+          "sender": "The address of the Chainlink node"
+        },
+        "returns": {
+          "_0": "The authorization status of the node"
+        }
+      },
+      "setAuthorizedSenders(address[])": {
+        "params": {
+          "senders": "The addresses of the authorized Chainlink node"
+        }
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "getAuthorizedSenders()": {
+        "notice": "Retrieve a list of authorized senders"
+      },
+      "isAuthorizedSender(address)": {
+        "notice": "Use this to check if a node is authorized for fulfilling requests"
+      },
+      "setAuthorizedSenders(address[])": {
+        "notice": "Sets the fulfillment permission for a given node. Use `true` to allow, `false` to disallow."
+      }
+    },
+    "version": 1
+  }
+}

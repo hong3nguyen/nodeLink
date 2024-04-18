@@ -20,8 +20,8 @@ contract ChainlinkOracle is ChainlinkClient {
 
     function requestVolumeData(bytes32 _jobId, string memory _url, string memory _path) public  {
         Chainlink.Request memory req = buildChainlinkRequest(_jobId, address(this), this.fulfill.selector);
-        req.addString("get", _url);
-        req.addString("path", _path);
+        // req.add("get", _url);
+        // req.add("path", _path);
         sendChainlinkRequestTo(oracle, req, fee);
     }
 

@@ -13,22 +13,24 @@ web3.eth.net.isListening()
 // Get the contract ABI
 const abi = JSON.parse(fs.readFileSync('../build/contracts/SimpleChainlink.json', 'utf8')).abi;
 // Get the contract address
-const contractAddress = '0x03b7c7CC00e76874d445490cfe63B64b79eFb961';
+const contractAddress = '0xFc9B62D16F5f56E7e32046411a9e1C90bef65831';
+
 // Create a new contract instance
 const contract = new web3.eth.Contract(abi, contractAddress);
 
+// Get the account address
 const accountAddress = '0x1B792475319E97186F676Bea61280388C0A12E7a';
 
 // get the LINK token contract ABI
 const linkAbi = JSON.parse(fs.readFileSync('../build/contracts/LinkToken.json', 'utf8')).abi;
-const linkAddress = "0x3f5CBA916576A6Ce277dA066fD210D895a595F71"
+const linkAddress = "0x238BDA11EDC5CB0fC96a53A6c3953a6415793e96"
 let linkTokenContract = new web3.eth.Contract(linkAbi, linkAddress);
 
 console.log('Contract address:', contract.address);
 console.log('From account:', accountAddress);
 console.log('from link address:', linkTokenContract.address);
 
-linkTokenContract.methods.mint(contractAddress, web3.utils.toWei('1000000000000000000000', 'ether')).send({ from: accountAddress }).then( () => {
+linkTokenContract.methods.transfer(contractAddress, web3.utils.toWei('1000000', 'ether')).send({ from: accountAddress }).then( () => {
   
   let contractbalance =  linkTokenContract.methods.balanceOf(contractAddress).call()
   .then(contractbalance => {

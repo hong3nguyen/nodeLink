@@ -48,7 +48,7 @@ Either way, try
 miner.setEtherbase(eth.accounts[0])
 
 
-web3.personal.unlockAccount(web3.personal.listAccounts[0],"alan132",15000);
+web3.personal.unlockAccount(web3.personal.listAccounts[0],"",15000);
 
 eth.sendTransaction({from: eth.accounts[0], to: eth.accounts[1], value: web3.toWei(1, "ether")})
 
@@ -275,3 +275,18 @@ Custom Contract: This is the contract you write and deploy. It interacts with th
 
 
 npx hardhat run scripts/deploy.js --network localhost
+
+> add money (Link) to oracle contract address
+
+> check carefully function from MockOracle and Operator
+
+# Flow
+
+1 - Ethereum
+2 - Link Token migrate 
+3 - Oracle contract migate with LinkToken address
+4 - config.toml for chainlink configuration with LinkToken address
+5 - Job with OracleContract address
+6 - compile custom contract with JobID
+7 - add LinkToken to this contract address
+8 - add money 

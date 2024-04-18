@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  * @dev Mock LINK Token for testing and development.
  * This token is a standard ERC20 token that can be used for simulating Chainlink token interactions in a private Ethereum network.
  */
-contract LinkToken is ERC20 {
+contract LinkTokenBasic is ERC20 {
     /**
      * @dev Constructor that gives msg.sender all of existing tokens.
      */
